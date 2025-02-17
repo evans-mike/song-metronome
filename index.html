@@ -1,371 +1,251 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <!-- Ensure proper scaling on mobile devices -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Multi BPM + Time Signature Beat Numbers</title>
+  <title>Setlist Tempo Keeper</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 10px;
       margin: 0;
     }
-
     h1 {
-      font-size: 1.5em;
       text-align: center;
       margin-bottom: 20px;
     }
-
-    /* Container for all rows */
-    #songContainer {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    /* Container holding all song modules */
+    #songsContainer {
+      margin-bottom: 15px;
     }
-
-    /* Each row styling */
-    .song-row {
+    /* Song module styling */
+    .song-module {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+      gap: 10px;
     }
-
-    .song-row label {
+    .song-module label {
       margin-right: 5px;
-      font-size: 0.9em;
-      min-width: 70px;
     }
-
-    .song-row input[type="text"],
-    .song-row input[type="number"],
-    .song-row select {
+    .song-module input[type="text"],
+    .song-module input[type="number"],
+    .song-module select {
       padding: 5px;
-      font-size: 0.9em;
-      margin-right: 10px;
-      margin-bottom: 5px;
+      font-size: 1em;
     }
-
-    /* Beat indicator container */
+    /* Beat indicator styling */
     .beat-indicator {
-      display: inline-block;
-      margin-bottom: 5px;
+      margin-left: auto;
     }
-
-    /* Each beat number styling */
     .beat-indicator span {
-      display: inline-block;
       margin-right: 5px;
       font-weight: bold;
-      color: #ccc;  /* lighter grey */
-      font-size: 2em;  /* larger numbers */
+      color: #ccc;
+      font-size: 2em;
       transition: color 0.2s;
     }
-
-    /* When active, change the number's color to black */
-    .beat-indicator span.beat-active,
-    .beat-indicator span.downbeat-active {
+    .beat-indicator span.active {
       color: black;
     }
-
     /* Responsive adjustments for small screens */
     @media (max-width: 480px) {
-      .song-row {
+      .song-module {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
       }
-      .song-row label,
-      .song-row input[type="text"],
-      .song-row input[type="number"],
-      .song-row select,
+      .song-module label,
+      .song-module input[type="text"],
+      .song-module input[type="number"],
+      .song-module select,
       .beat-indicator {
         margin-right: 0;
-      }
-      .song-row input,
-      .song-row select {
         width: 100%;
       }
+      .beat-indicator {
+        margin-top: 10px;
+        text-align: center;
+      }
     }
-
-    /* Style for the Copy URL button */
-    #copyUrlBtn {
-      display: block;
-      margin: 20px auto;
-      padding: 10px 20px;
+    button {
+      padding: 8px 12px;
       font-size: 1em;
+      margin: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h1>Multi BPM + Time Signature Beat Numbers</h1>
-  
-  <!-- Container for song rows -->
-  <div id="songContainer">
-    <!-- Row 1 -->
-    <div class="song-row" data-row="1">
-      <label for="song1">Song 1:</label>
-      <input id="song1" type="text" placeholder="Song Name" />
-      <label for="bpm1">BPM:</label>
-      <input id="bpm1" type="number" min="1" />
-      <label for="timeSig1">Time Sig:</label>
-      <select id="timeSig1">
-        <option value="2/2">2/2</option>
-        <option value="3/4" selected>3/4</option>
-        <option value="4/4">4/4</option>
-        <option value="6/8">6/8</option>
-        <option value="9/8">9/8</option>
-        <option value="12/8">12/8</option>
-      </select>
-      <!-- Beat numbers will be displayed here -->
-      <div id="beatIndicator1" class="beat-indicator"></div>
-    </div>
-
-    <!-- Row 2 -->
-    <div class="song-row" data-row="2">
-      <label for="song2">Song 2:</label>
-      <input id="song2" type="text" placeholder="Song Name" />
-      <label for="bpm2">BPM:</label>
-      <input id="bpm2" type="number" min="1" />
-      <label for="timeSig2">Time Sig:</label>
-      <select id="timeSig2">
-        <option value="2/2">2/2</option>
-        <option value="3/4">3/4</option>
-        <option value="4/4" selected>4/4</option>
-        <option value="6/8">6/8</option>
-        <option value="9/8">9/8</option>
-        <option value="12/8">12/8</option>
-      </select>
-      <div id="beatIndicator2" class="beat-indicator"></div>
-    </div>
-
-    <!-- Row 3 -->
-    <div class="song-row" data-row="3">
-      <label for="song3">Song 3:</label>
-      <input id="song3" type="text" placeholder="Song Name" />
-      <label for="bpm3">BPM:</label>
-      <input id="bpm3" type="number" min="1" />
-      <label for="timeSig3">Time Sig:</label>
-      <select id="timeSig3">
-        <option value="2/2">2/2</option>
-        <option value="3/4">3/4</option>
-        <option value="4/4" selected>4/4</option>
-        <option value="6/8">6/8</option>
-        <option value="9/8">9/8</option>
-        <option value="12/8">12/8</option>
-      </select>
-      <div id="beatIndicator3" class="beat-indicator"></div>
-    </div>
-
-    <!-- Row 4 -->
-    <div class="song-row" data-row="4">
-      <label for="song4">Song 4:</label>
-      <input id="song4" type="text" placeholder="Song Name" />
-      <label for="bpm4">BPM:</label>
-      <input id="bpm4" type="number" min="1" />
-      <label for="timeSig4">Time Sig:</label>
-      <select id="timeSig4">
-        <option value="2/2">2/2</option>
-        <option value="3/4">3/4</option>
-        <option value="4/4" selected>4/4</option>
-        <option value="6/8">6/8</option>
-        <option value="9/8">9/8</option>
-        <option value="12/8">12/8</option>
-      </select>
-      <div id="beatIndicator4" class="beat-indicator"></div>
-    </div>
-
-    <!-- Row 5 -->
-    <div class="song-row" data-row="5">
-      <label for="song5">Song 5:</label>
-      <input id="song5" type="text" placeholder="Song Name" />
-      <label for="bpm5">BPM:</label>
-      <input id="bpm5" type="number" min="1" />
-      <label for="timeSig5">Time Sig:</label>
-      <select id="timeSig5">
-        <option value="2/2">2/2</option>
-        <option value="3/4">3/4</option>
-        <option value="4/4" selected>4/4</option>
-        <option value="6/8">6/8</option>
-        <option value="9/8">9/8</option>
-        <option value="12/8">12/8</option>
-      </select>
-      <div id="beatIndicator5" class="beat-indicator"></div>
-    </div>
-
-    <!-- Row 6 -->
-    <div class="song-row" data-row="6">
-      <label for="song6">Song 6:</label>
-      <input id="song6" type="text" placeholder="Song Name" />
-      <label for="bpm6">BPM:</label>
-      <input id="bpm6" type="number" min="1" />
-      <label for="timeSig6">Time Sig:</label>
-      <select id="timeSig6">
-        <option value="2/2">2/2</option>
-        <option value="3/4">3/4</option>
-        <option value="4/4" selected>4/4</option>
-        <option value="6/8">6/8</option>
-        <option value="9/8">9/8</option>
-        <option value="12/8">12/8</option>
-      </select>
-      <div id="beatIndicator6" class="beat-indicator"></div>
-    </div>
-  </div>
-
-  <!-- Button to copy URL with current input values -->
+  <h1>Song BPM &amp; Time Signature</h1>
+  <!-- Container where song modules will be appended -->
+  <div id="songsContainer"></div>
+  <!-- Button to add new song modules -->
+  <button id="addSongBtn">+ Add Song</button>
+  <!-- Button to copy the current URL with all inputs as parameters -->
   <button id="copyUrlBtn">Copy URL with Values</button>
 
   <script>
-    // Object to store interval IDs and beat counts for each row
-    const blinkData = {
-      1: { intervalId: null, beatCount: 0 },
-      2: { intervalId: null, beatCount: 0 },
-      3: { intervalId: null, beatCount: 0 },
-      4: { intervalId: null, beatCount: 0 },
-      5: { intervalId: null, beatCount: 0 },
-      6: { intervalId: null, beatCount: 0 },
-    };
+    // Global module counter and beat data storage
+    let moduleCount = 0;
+    const beatData = {}; // Stores intervalId and beatCount for each module
 
     /**
-     * Sets up the beat numbers for a row and starts the interval that highlights each beat.
-     * @param {number} row - Row number (1 to 6).
-     * @param {number} bpm - Beats per minute.
-     * @param {string} timeSig - Time signature (e.g., "3/4").
+     * Creates and returns a song module (a DOM element) with its inputs and beat indicator.
+     * @param {number} index - The song module number.
+     * @param {object} data - Optional initial data: { song, bpm, timeSig }.
      */
-    function setBlinking(row, bpm, timeSig) {
-      // Clear any existing interval for this row
-      if (blinkData[row].intervalId) {
-        clearInterval(blinkData[row].intervalId);
+    function createSongModule(index, data = {}) {
+      const container = document.createElement('div');
+      container.className = 'song-module';
+      container.dataset.index = index;
+
+      // Build module inner HTML
+      container.innerHTML = `
+        <label>Song:
+          <input type="text" class="song-input" value="${data.song || ''}" placeholder="Song Name">
+        </label>
+        <label>BPM:
+          <input type="number" class="bpm-input" value="${data.bpm || ''}" placeholder="Tempo" min="1">
+        </label>
+        <label>Time Sig:
+          <select class="timesig-input">
+            <option value="2/2" ${data.timeSig === '2/2' ? 'selected' : ''}>2/2</option>
+            <option value="3/4" ${data.timeSig === '3/4' ? 'selected' : ''}>3/4</option>
+            <option value="4/4" ${data.timeSig === '4/4' ? 'selected' : ''}>4/4</option>
+            <option value="6/8" ${data.timeSig === '6/8' ? 'selected' : ''}>6/8</option>
+            <option value="9/8" ${data.timeSig === '9/8' ? 'selected' : ''}>9/8</option>
+            <option value="12/8" ${data.timeSig === '12/8' ? 'selected' : ''}>12/8</option>
+          </select>
+        </label>
+        <div class="beat-indicator"></div>
+      `;
+
+      // Attach event listeners so that changes update the beat indicator.
+      const bpmInput = container.querySelector('.bpm-input');
+      const timeSigInput = container.querySelector('.timesig-input');
+      bpmInput.addEventListener('input', () => { updateBeatIndicator(index); });
+      timeSigInput.addEventListener('change', () => { updateBeatIndicator(index); });
+
+      return container;
+    }
+
+    /**
+     * Sets up (or re‑sets) the beat indicator for the module with the given index.
+     * If a valid BPM is present, it generates the beat numbers and starts an interval timer.
+     */
+    function updateBeatIndicator(index) {
+      const moduleEl = document.querySelector(`.song-module[data-index="${index}"]`);
+      if (!moduleEl) return;
+      const bpmInput = moduleEl.querySelector('.bpm-input');
+      const timeSigInput = moduleEl.querySelector('.timesig-input');
+      const beatIndicator = moduleEl.querySelector('.beat-indicator');
+
+      // Clear any existing interval for this module.
+      if (beatData[index] && beatData[index].intervalId) {
+        clearInterval(beatData[index].intervalId);
       }
-      blinkData[row].beatCount = 0;
-      
-      const beatIndicator = document.getElementById("beatIndicator" + row);
-      
-      // If BPM is invalid or zero, clear the beat indicator and exit
+      beatData[index] = { intervalId: null, beatCount: 0 };
+
+      const bpm = Number(bpmInput.value);
       if (!bpm || bpm <= 0) {
-        beatIndicator.innerHTML = "";
+        beatIndicator.innerHTML = '';
         return;
       }
-      
-      // Parse the top number from the time signature (e.g., "3/4" gives 3)
-      const topNumber = parseInt(timeSig.split("/")[0], 10);
-      
-      // Generate beat numbers (e.g., 1 2 3 4) as spans
-      let beatHTML = "";
-      for (let j = 1; j <= topNumber; j++) {
-        beatHTML += `<span data-beat="${j}">${j}</span> `;
+      const timeSig = timeSigInput.value;
+      const topNumber = parseInt(timeSig.split('/')[0], 10);
+
+      // Generate beat numbers (e.g., "1 2 3 4")
+      let beatHTML = '';
+      for (let i = 1; i <= topNumber; i++) {
+        beatHTML += `<span data-beat="${i}">${i}</span> `;
       }
       beatIndicator.innerHTML = beatHTML;
-      
-      // Calculate interval (in ms) per beat
-      const interval = (60 / bpm) * 1000;
-      
-      // Start the interval timer to highlight beats
-      blinkData[row].intervalId = setInterval(() => {
-        blinkData[row].beatCount++;
-        // Calculate the current beat number (wraps around after topNumber)
-        const currentBeat = ((blinkData[row].beatCount - 1) % topNumber) + 1;
-        // Find the corresponding span element for the current beat
-        const span = beatIndicator.querySelector(`span[data-beat="${currentBeat}"]`);
-        if (span) {
-          // Add an active class to change the color to black
-          // (Both beat-active and downbeat-active now set color to black)
-          if (currentBeat === 1) {
-            span.classList.add("downbeat-active");
-          } else {
-            span.classList.add("beat-active");
-          }
-          // Remove the highlight after 100ms
-          setTimeout(() => {
-            span.classList.remove("downbeat-active");
-            span.classList.remove("beat-active");
-          }, 100);
+
+      const intervalMs = (60 / bpm) * 1000;
+      // Set an interval to highlight the current beat.
+      beatData[index].intervalId = setInterval(() => {
+        beatData[index].beatCount++;
+        const currentBeat = ((beatData[index].beatCount - 1) % topNumber) + 1;
+        const beatSpan = beatIndicator.querySelector(`span[data-beat="${currentBeat}"]`);
+        if (beatSpan) {
+          beatSpan.classList.add('active');
+          setTimeout(() => { beatSpan.classList.remove('active'); }, 100);
         }
-      }, interval);
+      }, intervalMs);
     }
 
     /**
-     * Loads the song, BPM, and time signature values from the URL parameters.
-     * Example parameters: ?song1=SongOne&bpm1=120&timeSig1=3/4
-     */
-    function loadFromUrlParams() {
-      const params = new URLSearchParams(window.location.search);
-      for (let i = 1; i <= 6; i++) {
-        const songField = document.getElementById("song" + i);
-        const bpmField  = document.getElementById("bpm" + i);
-        const tsField   = document.getElementById("timeSig" + i);
-        const songVal = params.get("song" + i);
-        const bpmVal  = params.get("bpm" + i);
-        const tsVal   = params.get("timeSig" + i);
-        if (songVal !== null) songField.value = decodeURIComponent(songVal);
-        if (bpmVal !== null)  bpmField.value = bpmVal;
-        if (tsVal !== null)   tsField.value = tsVal;
-        
-        // Start the beat indicator for this row
-        const numericBpm = Number(bpmField.value);
-        const currentTs  = tsField.value;
-        setBlinking(i, numericBpm, currentTs);
-      }
-    }
-
-    /**
-     * Builds a new URL containing the current song, BPM, and time signature values.
+     * Builds a URL containing current values from all song modules.
      */
     function buildUrlWithValues() {
       const params = new URLSearchParams();
-      for (let i = 1; i <= 6; i++) {
-        const songVal = document.getElementById("song" + i).value;
-        const bpmVal  = document.getElementById("bpm" + i).value;
-        const tsVal   = document.getElementById("timeSig" + i).value;
-        if (songVal) params.set("song" + i, songVal);
-        if (bpmVal)  params.set("bpm" + i, bpmVal);
-        if (tsVal)   params.set("timeSig" + i, tsVal);
-      }
-      return window.location.origin + window.location.pathname + "?" + params.toString();
+      const modules = document.querySelectorAll('.song-module');
+      modules.forEach((module, idx) => {
+        const index = idx + 1;
+        const songVal = module.querySelector('.song-input').value;
+        const bpmVal = module.querySelector('.bpm-input').value;
+        const timeSigVal = module.querySelector('.timesig-input').value;
+        if (songVal) params.set('song' + index, encodeURIComponent(songVal));
+        if (bpmVal) params.set('bpm' + index, bpmVal);
+        if (timeSigVal) params.set('timeSig' + index, timeSigVal);
+      });
+      return window.location.origin + window.location.pathname + '?' + params.toString();
     }
 
     /**
-     * Copies the provided URL to the clipboard.
+     * Loads song modules from URL parameters. If none exist, adds one default module.
      */
-    function copyUrlToClipboard(url) {
-      navigator.clipboard.writeText(url)
-        .then(() => {
-          alert("URL copied to clipboard:\n" + url);
-        })
-        .catch((err) => {
-          alert("Failed to copy URL: " + err);
-        });
+    function loadFromUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      let i = 1, found = false;
+      while (params.has('song' + i) || params.has('bpm' + i) || params.has('timeSig' + i)) {
+        found = true;
+        const data = {
+          song: params.get('song' + i) ? decodeURIComponent(params.get('song' + i)) : '',
+          bpm: params.get('bpm' + i) || '',
+          timeSig: params.get('timeSig' + i) || ''
+        };
+        addSongModule(data);
+        i++;
+      }
+      if (!found) {
+        addSongModule(); // Add one default module if no URL data is found.
+      }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      // Load values from URL if present
-      loadFromUrlParams();
+    /**
+     * Adds a new song module to the container and immediately starts its beat indicator.
+     */
+    function addSongModule(data = {}) {
+      moduleCount++;
+      const module = createSongModule(moduleCount, data);
+      document.getElementById('songsContainer').appendChild(module);
+      // Now that the module is in the DOM, update its beat indicator.
+      updateBeatIndicator(moduleCount);
+    }
 
-      // Attach event listeners for BPM and time signature changes on each row
-      for (let i = 1; i <= 6; i++) {
-        const bpmField = document.getElementById("bpm" + i);
-        const tsField  = document.getElementById("timeSig" + i);
-        bpmField.addEventListener("input", () => {
-          const numericBpm = Number(bpmField.value);
-          const currentTs  = tsField.value;
-          setBlinking(i, numericBpm, currentTs);
-        });
-        tsField.addEventListener("change", () => {
-          const numericBpm = Number(bpmField.value);
-          const currentTs  = tsField.value;
-          setBlinking(i, numericBpm, currentTs);
-        });
-      }
+    // Set up event listeners for the buttons.
+    document.getElementById('addSongBtn').addEventListener('click', () => {
+      addSongModule();
+    });
 
-      // Set up Copy URL button
-      const copyUrlBtn = document.getElementById("copyUrlBtn");
-      copyUrlBtn.addEventListener("click", () => {
-        const newUrl = buildUrlWithValues();
-        copyUrlToClipboard(newUrl);
+    document.getElementById('copyUrlBtn').addEventListener('click', () => {
+      const url = buildUrlWithValues();
+      navigator.clipboard.writeText(url).then(() => {
+        alert('URL copied to clipboard:\n' + url);
+      }).catch(err => {
+        alert('Error copying URL: ' + err);
       });
+    });
+
+    // Load song modules from URL parameters (or add one default) on page load.
+    window.addEventListener('DOMContentLoaded', () => {
+      loadFromUrlParams();
     });
   </script>
 </body>
