@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <!-- Ensures proper scaling on mobile devices -->
+  <!-- Ensure proper scaling on mobile devices -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Multi Tempo + Time Signature Blinker (Responsive)</title>
+  <title>Multi BPM + Time Signature Beat Numbers</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -18,14 +18,14 @@
       margin-bottom: 20px;
     }
 
-    /* Container for all song rows */
+    /* Container for all rows */
     #songContainer {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
 
-    /* Each row gets a flex layout with wrapping */
+    /* Each row styling */
     .song-row {
       display: flex;
       flex-wrap: wrap;
@@ -50,19 +50,26 @@
       margin-bottom: 5px;
     }
 
-    .indicator {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background-color: red;
-      opacity: 0;
-      transition: opacity 0.2s, background-color 0.2s;
+    /* Beat indicator container */
+    .beat-indicator {
+      display: inline-block;
       margin-bottom: 5px;
     }
 
-    /* Shows the indicator (blink) */
-    .blink {
-      opacity: 1 !important;
+    /* Each beat number styling */
+    .beat-indicator span {
+      display: inline-block;
+      margin-right: 5px;
+      font-weight: bold;
+      color: #ccc;  /* lighter grey */
+      font-size: 2em;  /* larger numbers */
+      transition: color 0.2s;
+    }
+
+    /* When active, change the number's color to black */
+    .beat-indicator span.beat-active,
+    .beat-indicator span.downbeat-active {
+      color: black;
     }
 
     /* Responsive adjustments for small screens */
@@ -75,15 +82,12 @@
       .song-row input[type="text"],
       .song-row input[type="number"],
       .song-row select,
-      .indicator {
+      .beat-indicator {
         margin-right: 0;
       }
       .song-row input,
       .song-row select {
         width: 100%;
-      }
-      .indicator {
-        margin-top: 10px;
       }
     }
 
@@ -97,7 +101,7 @@
   </style>
 </head>
 <body>
-  <h1>Multi BPM + Time Signature Blinker</h1>
+  <h1>Multi BPM + Time Signature Beat Numbers</h1>
   
   <!-- Container for song rows -->
   <div id="songContainer">
@@ -116,7 +120,8 @@
         <option value="9/8">9/8</option>
         <option value="12/8">12/8</option>
       </select>
-      <div id="indicator1" class="indicator"></div>
+      <!-- Beat numbers will be displayed here -->
+      <div id="beatIndicator1" class="beat-indicator"></div>
     </div>
 
     <!-- Row 2 -->
@@ -134,7 +139,7 @@
         <option value="9/8">9/8</option>
         <option value="12/8">12/8</option>
       </select>
-      <div id="indicator2" class="indicator"></div>
+      <div id="beatIndicator2" class="beat-indicator"></div>
     </div>
 
     <!-- Row 3 -->
@@ -152,7 +157,7 @@
         <option value="9/8">9/8</option>
         <option value="12/8">12/8</option>
       </select>
-      <div id="indicator3" class="indicator"></div>
+      <div id="beatIndicator3" class="beat-indicator"></div>
     </div>
 
     <!-- Row 4 -->
@@ -170,7 +175,7 @@
         <option value="9/8">9/8</option>
         <option value="12/8">12/8</option>
       </select>
-      <div id="indicator4" class="indicator"></div>
+      <div id="beatIndicator4" class="beat-indicator"></div>
     </div>
 
     <!-- Row 5 -->
@@ -188,7 +193,7 @@
         <option value="9/8">9/8</option>
         <option value="12/8">12/8</option>
       </select>
-      <div id="indicator5" class="indicator"></div>
+      <div id="beatIndicator5" class="beat-indicator"></div>
     </div>
 
     <!-- Row 6 -->
@@ -206,7 +211,7 @@
         <option value="9/8">9/8</option>
         <option value="12/8">12/8</option>
       </select>
-      <div id="indicator6" class="indicator"></div>
+      <div id="beatIndicator6" class="beat-indicator"></div>
     </div>
   </div>
 
@@ -214,7 +219,7 @@
   <button id="copyUrlBtn">Copy URL with Values</button>
 
   <script>
-    // Object to store interval IDs and beat counts per row
+    // Object to store interval IDs and beat counts for each row
     const blinkData = {
       1: { intervalId: null, beatCount: 0 },
       2: { intervalId: null, beatCount: 0 },
@@ -225,57 +230,66 @@
     };
 
     /**
-     * Sets blinking for a given row using BPM and time signature.
-     * @param {number} row - The row number (1 to 6)
-     * @param {number} bpm - Beats per minute
-     * @param {string} timeSig - Time signature string (e.g., "3/4")
+     * Sets up the beat numbers for a row and starts the interval that highlights each beat.
+     * @param {number} row - Row number (1 to 6).
+     * @param {number} bpm - Beats per minute.
+     * @param {string} timeSig - Time signature (e.g., "3/4").
      */
     function setBlinking(row, bpm, timeSig) {
       // Clear any existing interval for this row
       if (blinkData[row].intervalId) {
         clearInterval(blinkData[row].intervalId);
       }
-      // Reset beat count
       blinkData[row].beatCount = 0;
-
-      const indicator = document.getElementById("indicator" + row);
-
-      // If BPM is invalid or zero, reset the indicator and exit
+      
+      const beatIndicator = document.getElementById("beatIndicator" + row);
+      
+      // If BPM is invalid or zero, clear the beat indicator and exit
       if (!bpm || bpm <= 0) {
-        indicator.classList.remove("blink");
-        indicator.style.backgroundColor = "red";
+        beatIndicator.innerHTML = "";
         return;
       }
-
+      
       // Parse the top number from the time signature (e.g., "3/4" gives 3)
       const topNumber = parseInt(timeSig.split("/")[0], 10);
-
-      // Calculate interval (ms) per beat
+      
+      // Generate beat numbers (e.g., 1 2 3 4) as spans
+      let beatHTML = "";
+      for (let j = 1; j <= topNumber; j++) {
+        beatHTML += `<span data-beat="${j}">${j}</span> `;
+      }
+      beatIndicator.innerHTML = beatHTML;
+      
+      // Calculate interval (in ms) per beat
       const interval = (60 / bpm) * 1000;
-
-      // Create the interval timer for blinking
+      
+      // Start the interval timer to highlight beats
       blinkData[row].intervalId = setInterval(() => {
         blinkData[row].beatCount++;
-
-        // Show indicator
-        indicator.classList.add("blink");
-
-        // Blink green on the downbeat (i.e. when beatCount % topNumber === 1)
-        if ((blinkData[row].beatCount % topNumber) === 1) {
-          indicator.style.backgroundColor = "green";
-        } else {
-          indicator.style.backgroundColor = "red";
+        // Calculate the current beat number (wraps around after topNumber)
+        const currentBeat = ((blinkData[row].beatCount - 1) % topNumber) + 1;
+        // Find the corresponding span element for the current beat
+        const span = beatIndicator.querySelector(`span[data-beat="${currentBeat}"]`);
+        if (span) {
+          // Add an active class to change the color to black
+          // (Both beat-active and downbeat-active now set color to black)
+          if (currentBeat === 1) {
+            span.classList.add("downbeat-active");
+          } else {
+            span.classList.add("beat-active");
+          }
+          // Remove the highlight after 100ms
+          setTimeout(() => {
+            span.classList.remove("downbeat-active");
+            span.classList.remove("beat-active");
+          }, 100);
         }
-
-        // Hide the indicator shortly after the blink
-        setTimeout(() => {
-          indicator.classList.remove("blink");
-        }, 100);
       }, interval);
     }
 
     /**
-     * Loads values from URL parameters and initializes each row.
+     * Loads the song, BPM, and time signature values from the URL parameters.
+     * Example parameters: ?song1=SongOne&bpm1=120&timeSig1=3/4
      */
     function loadFromUrlParams() {
       const params = new URLSearchParams(window.location.search);
@@ -283,22 +297,14 @@
         const songField = document.getElementById("song" + i);
         const bpmField  = document.getElementById("bpm" + i);
         const tsField   = document.getElementById("timeSig" + i);
-
         const songVal = params.get("song" + i);
         const bpmVal  = params.get("bpm" + i);
         const tsVal   = params.get("timeSig" + i);
-
-        if (songVal !== null) {
-          songField.value = decodeURIComponent(songVal);
-        }
-        if (bpmVal !== null) {
-          bpmField.value = bpmVal;
-        }
-        if (tsVal !== null) {
-          tsField.value = tsVal;
-        }
-
-        // Start blinking for this row using the BPM and time signature values
+        if (songVal !== null) songField.value = decodeURIComponent(songVal);
+        if (bpmVal !== null)  bpmField.value = bpmVal;
+        if (tsVal !== null)   tsField.value = tsVal;
+        
+        // Start the beat indicator for this row
         const numericBpm = Number(bpmField.value);
         const currentTs  = tsField.value;
         setBlinking(i, numericBpm, currentTs);
@@ -306,7 +312,7 @@
     }
 
     /**
-     * Builds a URL containing the current input values.
+     * Builds a new URL containing the current song, BPM, and time signature values.
      */
     function buildUrlWithValues() {
       const params = new URLSearchParams();
@@ -314,7 +320,6 @@
         const songVal = document.getElementById("song" + i).value;
         const bpmVal  = document.getElementById("bpm" + i).value;
         const tsVal   = document.getElementById("timeSig" + i).value;
-
         if (songVal) params.set("song" + i, songVal);
         if (bpmVal)  params.set("bpm" + i, bpmVal);
         if (tsVal)   params.set("timeSig" + i, tsVal);
@@ -336,20 +341,18 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      // Initialize from URL parameters if present
+      // Load values from URL if present
       loadFromUrlParams();
 
-      // Attach event listeners for BPM and Time Signature changes
+      // Attach event listeners for BPM and time signature changes on each row
       for (let i = 1; i <= 6; i++) {
         const bpmField = document.getElementById("bpm" + i);
         const tsField  = document.getElementById("timeSig" + i);
-
         bpmField.addEventListener("input", () => {
           const numericBpm = Number(bpmField.value);
           const currentTs  = tsField.value;
           setBlinking(i, numericBpm, currentTs);
         });
-
         tsField.addEventListener("change", () => {
           const numericBpm = Number(bpmField.value);
           const currentTs  = tsField.value;
@@ -357,7 +360,7 @@
         });
       }
 
-      // Copy URL button functionality
+      // Set up Copy URL button
       const copyUrlBtn = document.getElementById("copyUrlBtn");
       copyUrlBtn.addEventListener("click", () => {
         const newUrl = buildUrlWithValues();
