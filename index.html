@@ -5,45 +5,68 @@
   <!-- Ensure proper scaling on mobile devices -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Setlist Tempo Keeper</title>
+  <!-- Ionicons for modern icons -->
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
   <style>
+    /* Use system fonts similar to iOS defaults */
     body {
-      font-family: Arial, sans-serif;
-      padding: 10px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background-color: #f2f2f7;
       margin: 0;
+      padding: 20px;
+      color: #1c1c1e;
     }
     h1 {
       text-align: center;
       margin-bottom: 20px;
+      font-weight: 600;
+      font-size: 1.8em;
     }
     /* Container holding all song modules */
     #songsContainer {
       margin-bottom: 15px;
     }
+
     /* Song module styling */
     .song-module {
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      padding: 10px;
-      margin-bottom: 10px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      margin-bottom: 15px;
+      display: flex;              /* flex layout */
+      align-items: center;        /* vertically center content */
+      gap: 20px;                  /* spacing between sections */
+    }
+    /* Left section: Song name, BPM, TimeSig inputs */
+    .inputs {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
       gap: 10px;
-      position: relative;
     }
-    .song-module label {
+    .inputs label {
+      font-size: 0.95em;
       margin-right: 5px;
     }
-    .song-module input[type="text"],
-    .song-module input[type="number"],
-    .song-module select {
-      padding: 5px;
+    .inputs input[type="text"],
+    .inputs input[type="number"],
+    .inputs select {
+      padding: 8px;
       font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      transition: border-color 0.2s;
     }
-    /* Beat indicator styling */
-    .beat-indicator {
-      margin-left: auto;
+    .inputs input[type="text"]:focus,
+    .inputs input[type="number"]:focus,
+    .inputs select:focus {
+      border-color: #007aff;
     }
+
+    /* Middle section: Beat indicator */
     .beat-indicator span {
       margin-right: 5px;
       font-weight: bold;
@@ -52,45 +75,55 @@
       transition: color 0.2s;
     }
     .beat-indicator span.active {
-      color: black;
+      color: #1c1c1e;
     }
-    /* Remove button (trash icon) styling */
+
+    /* Right section: Remove button (trash icon) */
     .remove-song-btn {
       background: none;
       border: none;
-      font-size: 1.5em;
       cursor: pointer;
-      margin-left: auto;
-      color: #900;
+      color: #ff3b30;
+      font-size: 1.8em;
+      outline: none;
+      margin-left: auto;  /* pushes the icon to the far right */
     }
+
+    /* Modern styled buttons */
+    button {
+      background-color: #007aff;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      padding: 10px 15px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #005ecb;
+    }
+
     /* Responsive adjustments for small screens */
     @media (max-width: 480px) {
       .song-module {
-        flex-direction: column;
+        flex-direction: column;   /* stack vertically */
         align-items: stretch;
       }
-      .song-module label,
-      .song-module input[type="text"],
-      .song-module input[type="number"],
-      .song-module select,
-      .beat-indicator {
+      .inputs, .beat-indicator, .remove-song-btn {
         margin-right: 0;
         width: 100%;
       }
       .beat-indicator {
         margin-top: 10px;
-        text-align: center;
+        text-align: left;  /* numbers left-aligned */
       }
       .remove-song-btn {
         align-self: flex-end;
-        margin-top: 5px;
+        margin-top: 10px;
+        margin-left: 0;
       }
-    }
-    button {
-      padding: 8px 12px;
-      font-size: 1em;
-      margin: 5px;
-      cursor: pointer;
     }
   </style>
 </head>
@@ -117,9 +150,11 @@
       const container = document.createElement('div');
       container.className = 'song-module';
       container.dataset.index = index;
-      
-      // Build module inner HTML with default time signature set to 4/4 if none provided.
-      container.innerHTML = `
+
+      // Left section: inputs
+      const inputsDiv = document.createElement('div');
+      inputsDiv.className = 'inputs';
+      inputsDiv.innerHTML = `
         <label>Song:
           <input type="text" class="song-input" value="${data.song || ''}" placeholder="Song Name">
         </label>
@@ -136,14 +171,17 @@
             <option value="12/8" ${data.timeSig === '12/8' ? 'selected' : ''}>12/8</option>
           </select>
         </label>
-        <div class="beat-indicator"></div>
       `;
-      
-      // Create a remove button with a trash icon.
+
+      // Middle section: beat indicator
+      const beatIndicator = document.createElement('div');
+      beatIndicator.className = 'beat-indicator';
+
+      // Right section: remove button
       const removeBtn = document.createElement('button');
       removeBtn.className = 'remove-song-btn';
       removeBtn.title = "Remove this song";
-      removeBtn.innerHTML = '🗑️'; // Trash icon (emoji). You can replace with an SVG if desired.
+      removeBtn.innerHTML = '<ion-icon name="trash-outline"></ion-icon>';
       removeBtn.addEventListener('click', () => {
         // Clear any running interval for this module.
         if (beatData[index] && beatData[index].intervalId) {
@@ -152,14 +190,18 @@
         }
         container.remove();
       });
+
+      // Append sections in order: inputs, beat indicator, remove button
+      container.appendChild(inputsDiv);
+      container.appendChild(beatIndicator);
       container.appendChild(removeBtn);
-      
+
       // Attach event listeners so that changes update the beat indicator.
-      const bpmInput = container.querySelector('.bpm-input');
-      const timeSigInput = container.querySelector('.timesig-input');
+      const bpmInput = inputsDiv.querySelector('.bpm-input');
+      const timeSigInput = inputsDiv.querySelector('.timesig-input');
       bpmInput.addEventListener('input', () => { updateBeatIndicator(index); });
       timeSigInput.addEventListener('change', () => { updateBeatIndicator(index); });
-      
+
       return container;
     }
 
@@ -279,4 +321,3 @@
   </script>
 </body>
 </html>
-
