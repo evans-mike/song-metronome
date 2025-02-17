@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <!-- Ensures proper scaling on mobile devices -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multi Tempo + Time Signature Blinker (Responsive)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 1.5em;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* Container for all song rows */
+    #songContainer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Each row gets a flex layout with wrapping */
+    .song-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .song-row label {
+      margin-right: 5px;
+      font-size: 0.9em;
+      min-width: 70px;
+    }
+
+    .song-row input[type="text"],
+    .song-row input[type="number"],
+    .song-row select {
+      padding: 5px;
+      font-size: 0.9em;
+      margin-right: 10px;
+      margin-bottom: 5px;
+    }
+
+    .indicator {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: red;
+      opacity: 0;
+      transition: opacity 0.2s, background-color 0.2s;
+      margin-bottom: 5px;
+    }
+
+    /* Shows the indicator (blink) */
+    .blink {
+      opacity: 1 !important;
+    }
+
+    /* Responsive adjustments for small screens */
+    @media (max-width: 480px) {
+      .song-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .song-row label,
+      .song-row input[type="text"],
+      .song-row input[type="number"],
+      .song-row select,
+      .indicator {
+        margin-right: 0;
+      }
+      .song-row input,
+      .song-row select {
+        width: 100%;
+      }
+      .indicator {
+        margin-top: 10px;
+      }
+    }
+
+    /* Style for the Copy URL button */
+    #copyUrlBtn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Multi BPM + Time Signature Blinker</h1>
+  
+  <!-- Container for song rows -->
+  <div id="songContainer">
+    <!-- Row 1 -->
+    <div class="song-row" data-row="1">
+      <label for="song1">Song 1:</label>
+      <input id="song1" type="text" placeholder="Song Name" />
+      <label for="bpm1">BPM:</label>
+      <input id="bpm1" type="number" min="1" />
+      <label for="timeSig1">Time Sig:</label>
+      <select id="timeSig1">
+        <option value="2/2">2/2</option>
+        <option value="3/4" selected>3/4</option>
+        <option value="4/4">4/4</option>
+        <option value="6/8">6/8</option>
+        <option value="9/8">9/8</option>
+        <option value="12/8">12/8</option>
+      </select>
+      <div id="indicator1" class="indicator"></div>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="song-row" data-row="2">
+      <label for="song2">Song 2:</label>
+      <input id="song2" type="text" placeholder="Song Name" />
+      <label for="bpm2">BPM:</label>
+      <input id="bpm2" type="number" min="1" />
+      <label for="timeSig2">Time Sig:</label>
+      <select id="timeSig2">
+        <option value="2/2">2/2</option>
+        <option value="3/4">3/4</option>
+        <option value="4/4" selected>4/4</option>
+        <option value="6/8">6/8</option>
+        <option value="9/8">9/8</option>
+        <option value="12/8">12/8</option>
+      </select>
+      <div id="indicator2" class="indicator"></div>
+    </div>
+
+    <!-- Row 3 -->
+    <div class="song-row" data-row="3">
+      <label for="song3">Song 3:</label>
+      <input id="song3" type="text" placeholder="Song Name" />
+      <label for="bpm3">BPM:</label>
+      <input id="bpm3" type="number" min="1" />
+      <label for="timeSig3">Time Sig:</label>
+      <select id="timeSig3">
+        <option value="2/2">2/2</option>
+        <option value="3/4">3/4</option>
+        <option value="4/4" selected>4/4</option>
+        <option value="6/8">6/8</option>
+        <option value="9/8">9/8</option>
+        <option value="12/8">12/8</option>
+      </select>
+      <div id="indicator3" class="indicator"></div>
+    </div>
+
+    <!-- Row 4 -->
+    <div class="song-row" data-row="4">
+      <label for="song4">Song 4:</label>
+      <input id="song4" type="text" placeholder="Song Name" />
+      <label for="bpm4">BPM:</label>
+      <input id="bpm4" type="number" min="1" />
+      <label for="timeSig4">Time Sig:</label>
+      <select id="timeSig4">
+        <option value="2/2">2/2</option>
+        <option value="3/4">3/4</option>
+        <option value="4/4" selected>4/4</option>
+        <option value="6/8">6/8</option>
+        <option value="9/8">9/8</option>
+        <option value="12/8">12/8</option>
+      </select>
+      <div id="indicator4" class="indicator"></div>
+    </div>
+
+    <!-- Row 5 -->
+    <div class="song-row" data-row="5">
+      <label for="song5">Song 5:</label>
+      <input id="song5" type="text" placeholder="Song Name" />
+      <label for="bpm5">BPM:</label>
+      <input id="bpm5" type="number" min="1" />
+      <label for="timeSig5">Time Sig:</label>
+      <select id="timeSig5">
+        <option value="2/2">2/2</option>
+        <option value="3/4">3/4</option>
+        <option value="4/4" selected>4/4</option>
+        <option value="6/8">6/8</option>
+        <option value="9/8">9/8</option>
+        <option value="12/8">12/8</option>
+      </select>
+      <div id="indicator5" class="indicator"></div>
+    </div>
+
+    <!-- Row 6 -->
+    <div class="song-row" data-row="6">
+      <label for="song6">Song 6:</label>
+      <input id="song6" type="text" placeholder="Song Name" />
+      <label for="bpm6">BPM:</label>
+      <input id="bpm6" type="number" min="1" />
+      <label for="timeSig6">Time Sig:</label>
+      <select id="timeSig6">
+        <option value="2/2">2/2</option>
+        <option value="3/4">3/4</option>
+        <option value="4/4" selected>4/4</option>
+        <option value="6/8">6/8</option>
+        <option value="9/8">9/8</option>
+        <option value="12/8">12/8</option>
+      </select>
+      <div id="indicator6" class="indicator"></div>
+    </div>
+  </div>
+
+  <!-- Button to copy URL with current input values -->
+  <button id="copyUrlBtn">Copy URL with Values</button>
+
+  <script>
+    // Object to store interval IDs and beat counts per row
+    const blinkData = {
+      1: { intervalId: null, beatCount: 0 },
+      2: { intervalId: null, beatCount: 0 },
+      3: { intervalId: null, beatCount: 0 },
+      4: { intervalId: null, beatCount: 0 },
+      5: { intervalId: null, beatCount: 0 },
+      6: { intervalId: null, beatCount: 0 },
+    };
+
+    /**
+     * Sets blinking for a given row using BPM and time signature.
+     * @param {number} row - The row number (1 to 6)
+     * @param {number} bpm - Beats per minute
+     * @param {string} timeSig - Time signature string (e.g., "3/4")
+     */
+    function setBlinking(row, bpm, timeSig) {
+      // Clear any existing interval for this row
+      if (blinkData[row].intervalId) {
+        clearInterval(blinkData[row].intervalId);
+      }
+      // Reset beat count
+      blinkData[row].beatCount = 0;
+
+      const indicator = document.getElementById("indicator" + row);
+
+      // If BPM is invalid or zero, reset the indicator and exit
+      if (!bpm || bpm <= 0) {
+        indicator.classList.remove("blink");
+        indicator.style.backgroundColor = "red";
+        return;
+      }
+
+      // Parse the top number from the time signature (e.g., "3/4" gives 3)
+      const topNumber = parseInt(timeSig.split("/")[0], 10);
+
+      // Calculate interval (ms) per beat
+      const interval = (60 / bpm) * 1000;
+
+      // Create the interval timer for blinking
+      blinkData[row].intervalId = setInterval(() => {
+        blinkData[row].beatCount++;
+
+        // Show indicator
+        indicator.classList.add("blink");
+
+        // Blink green on the downbeat (i.e. when beatCount % topNumber === 1)
+        if ((blinkData[row].beatCount % topNumber) === 1) {
+          indicator.style.backgroundColor = "green";
+        } else {
+          indicator.style.backgroundColor = "red";
+        }
+
+        // Hide the indicator shortly after the blink
+        setTimeout(() => {
+          indicator.classList.remove("blink");
+        }, 100);
+      }, interval);
+    }
+
+    /**
+     * Loads values from URL parameters and initializes each row.
+     */
+    function loadFromUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      for (let i = 1; i <= 6; i++) {
+        const songField = document.getElementById("song" + i);
+        const bpmField  = document.getElementById("bpm" + i);
+        const tsField   = document.getElementById("timeSig" + i);
+
+        const songVal = params.get("song" + i);
+        const bpmVal  = params.get("bpm" + i);
+        const tsVal   = params.get("timeSig" + i);
+
+        if (songVal !== null) {
+          songField.value = decodeURIComponent(songVal);
+        }
+        if (bpmVal !== null) {
+          bpmField.value = bpmVal;
+        }
+        if (tsVal !== null) {
+          tsField.value = tsVal;
+        }
+
+        // Start blinking for this row using the BPM and time signature values
+        const numericBpm = Number(bpmField.value);
+        const currentTs  = tsField.value;
+        setBlinking(i, numericBpm, currentTs);
+      }
+    }
+
+    /**
+     * Builds a URL containing the current input values.
+     */
+    function buildUrlWithValues() {
+      const params = new URLSearchParams();
+      for (let i = 1; i <= 6; i++) {
+        const songVal = document.getElementById("song" + i).value;
+        const bpmVal  = document.getElementById("bpm" + i).value;
+        const tsVal   = document.getElementById("timeSig" + i).value;
+
+        if (songVal) params.set("song" + i, songVal);
+        if (bpmVal)  params.set("bpm" + i, bpmVal);
+        if (tsVal)   params.set("timeSig" + i, tsVal);
+      }
+      return window.location.origin + window.location.pathname + "?" + params.toString();
+    }
+
+    /**
+     * Copies the provided URL to the clipboard.
+     */
+    function copyUrlToClipboard(url) {
+      navigator.clipboard.writeText(url)
+        .then(() => {
+          alert("URL copied to clipboard:\n" + url);
+        })
+        .catch((err) => {
+          alert("Failed to copy URL: " + err);
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Initialize from URL parameters if present
+      loadFromUrlParams();
+
+      // Attach event listeners for BPM and Time Signature changes
+      for (let i = 1; i <= 6; i++) {
+        const bpmField = document.getElementById("bpm" + i);
+        const tsField  = document.getElementById("timeSig" + i);
+
+        bpmField.addEventListener("input", () => {
+          const numericBpm = Number(bpmField.value);
+          const currentTs  = tsField.value;
+          setBlinking(i, numericBpm, currentTs);
+        });
+
+        tsField.addEventListener("change", () => {
+          const numericBpm = Number(bpmField.value);
+          const currentTs  = tsField.value;
+          setBlinking(i, numericBpm, currentTs);
+        });
+      }
+
+      // Copy URL button functionality
+      const copyUrlBtn = document.getElementById("copyUrlBtn");
+      copyUrlBtn.addEventListener("click", () => {
+        const newUrl = buildUrlWithValues();
+        copyUrlToClipboard(newUrl);
+      });
+    });
+  </script>
+</body>
+</html>
