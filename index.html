@@ -29,6 +29,7 @@
       flex-wrap: wrap;
       align-items: center;
       gap: 10px;
+      position: relative;
     }
     .song-module label {
       margin-right: 5px;
@@ -53,6 +54,15 @@
     .beat-indicator span.active {
       color: black;
     }
+    /* Remove button (trash icon) styling */
+    .remove-song-btn {
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      cursor: pointer;
+      margin-left: auto;
+      color: #900;
+    }
     /* Responsive adjustments for small screens */
     @media (max-width: 480px) {
       .song-module {
@@ -71,6 +81,10 @@
         margin-top: 10px;
         text-align: center;
       }
+      .remove-song-btn {
+        align-self: flex-end;
+        margin-top: 5px;
+      }
     }
     button {
       padding: 8px 12px;
@@ -84,18 +98,18 @@
   <h1>Setlist Tempo Keeper</h1>
   <!-- Container where song modules will be appended -->
   <div id="songsContainer"></div>
-  <!-- Button to add new song modules -->
+  <!-- Button to add a new song module -->
   <button id="addSongBtn">+ Add Song</button>
   <!-- Button to copy the current URL with all inputs as parameters -->
   <button id="copyUrlBtn">Copy URL with Values</button>
 
   <script>
-    // Global module counter and beat data storage
+    // Global module counter and beat data storage for each module.
     let moduleCount = 0;
     const beatData = {}; // Stores intervalId and beatCount for each module
 
     /**
-     * Creates and returns a song module (a DOM element) with its inputs and beat indicator.
+     * Creates and returns a song module (a DOM element) with its inputs, beat indicator, and remove button.
      * @param {number} index - The song module number.
      * @param {object} data - Optional initial data: { song, bpm, timeSig }.
      */
@@ -103,8 +117,8 @@
       const container = document.createElement('div');
       container.className = 'song-module';
       container.dataset.index = index;
-
-      // Build module inner HTML
+      
+      // Build module inner HTML.
       container.innerHTML = `
         <label>Song:
           <input type="text" class="song-input" value="${data.song || ''}" placeholder="Song Name">
@@ -124,13 +138,28 @@
         </label>
         <div class="beat-indicator"></div>
       `;
-
+      
+      // Create a remove button with a trash icon.
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-song-btn';
+      removeBtn.title = "Remove this song";
+      removeBtn.innerHTML = '🗑️'; // Trash icon (emoji). You can replace with an SVG if desired.
+      removeBtn.addEventListener('click', () => {
+        // Clear any running interval for this module.
+        if (beatData[index] && beatData[index].intervalId) {
+          clearInterval(beatData[index].intervalId);
+          delete beatData[index];
+        }
+        container.remove();
+      });
+      container.appendChild(removeBtn);
+      
       // Attach event listeners so that changes update the beat indicator.
       const bpmInput = container.querySelector('.bpm-input');
       const timeSigInput = container.querySelector('.timesig-input');
       bpmInput.addEventListener('input', () => { updateBeatIndicator(index); });
       timeSigInput.addEventListener('change', () => { updateBeatIndicator(index); });
-
+      
       return container;
     }
 
@@ -159,7 +188,7 @@
       const timeSig = timeSigInput.value;
       const topNumber = parseInt(timeSig.split('/')[0], 10);
 
-      // Generate beat numbers (e.g., "1 2 3 4")
+      // Generate beat numbers (e.g., "1 2 3 4").
       let beatHTML = '';
       for (let i = 1; i <= topNumber; i++) {
         beatHTML += `<span data-beat="${i}">${i}</span> `;
