@@ -118,7 +118,7 @@
       container.className = 'song-module';
       container.dataset.index = index;
       
-      // Build module inner HTML.
+      // Build module inner HTML with default time signature set to 4/4 if none provided.
       container.innerHTML = `
         <label>Song:
           <input type="text" class="song-input" value="${data.song || ''}" placeholder="Song Name">
@@ -130,7 +130,7 @@
           <select class="timesig-input">
             <option value="2/2" ${data.timeSig === '2/2' ? 'selected' : ''}>2/2</option>
             <option value="3/4" ${data.timeSig === '3/4' ? 'selected' : ''}>3/4</option>
-            <option value="4/4" ${data.timeSig === '4/4' ? 'selected' : ''}>4/4</option>
+            <option value="4/4" ${(!data.timeSig || data.timeSig === '4/4') ? 'selected' : ''}>4/4</option>
             <option value="6/8" ${data.timeSig === '6/8' ? 'selected' : ''}>6/8</option>
             <option value="9/8" ${data.timeSig === '9/8' ? 'selected' : ''}>9/8</option>
             <option value="12/8" ${data.timeSig === '12/8' ? 'selected' : ''}>12/8</option>
@@ -279,3 +279,4 @@
   </script>
 </body>
 </html>
+
