@@ -201,7 +201,6 @@
         grid-template-columns: 1fr 1fr;
         grid-template-rows: auto auto auto auto;
       }
-
       /* Song Title => row1 col1 */
       .song-title-container {
         grid-column: 1;
@@ -253,7 +252,7 @@
     /**
      * Creates a song module with:
      *  - Song Title (inline editing)
-     *  - BPM <select> (scrollable numeric options 30..300, default 68)
+     *  - BPM <select> (30..300, default 68)
      *  - Tap Tempo button
      *  - TimeSig <select>
      *  - Beat indicator
@@ -315,10 +314,9 @@
       songTitleContainer.appendChild(songDisplay);
       songTitleContainer.appendChild(songInput);
 
-      // BPM <select> (from 30..300, default 68 if no data)
+      // BPM <select> (30..300, default 68)
       const bpmSelect = document.createElement('select');
       bpmSelect.className = 'bpm-select';
-      // Populate numeric options
       for (let i = 30; i <= 300; i++) {
         const opt = document.createElement('option');
         opt.value = i;
@@ -481,6 +479,23 @@
     }
 
     /**
+     * Copy the given URL to clipboard, then reload the page with that URL.
+     */
+    function copyUrlAndReload(newUrl) {
+      navigator.clipboard.writeText(newUrl)
+        .then(() => {
+          alert('URL copied to clipboard:\n' + newUrl);
+          // Reload with the new URL so the address bar matches
+          window.location.href = newUrl;
+        })
+        .catch((err) => {
+          alert('Error copying URL: ' + err);
+          // Even if copying fails, reload with new URL
+          window.location.href = newUrl;
+        });
+    }
+
+    /**
      * Load modules from the compressed "data" param, or create one default module.
      */
     function loadFromUrlParams() {
@@ -526,11 +541,7 @@
     });
     document.getElementById('copyUrlBtn').addEventListener('click', () => {
       const newUrl = buildUrlWithValues();
-      navigator.clipboard.writeText(newUrl).then(() => {
-        alert('URL copied to clipboard:\n' + newUrl);
-      }).catch(err => {
-        alert('Error copying URL: ' + err);
-      });
+      copyUrlAndReload(newUrl);
     });
 
     // Initialize on page load
