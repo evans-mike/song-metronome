@@ -23,13 +23,47 @@
 
   <style>
     /* Use system fonts similar to iOS defaults */
+    :root {
+      --bg-color: #f2f2f7;
+      --text-color: #1c1c1e;
+      --module-bg: #fff;
+      --module-text: #1c1c1e;
+      --indicator-inactive: #ccc;
+      --indicator-active: #1c1c1e;
+      --button-bg: #007aff;
+      --button-hover-bg: #005ecb;
+      --tap-button-bg: #34c759;
+      --tap-button-hover: #2ea84c;
+      --trash-icon-color: #ff3b30;
+      --border-color: #ccc;
+      --focus-border-color: #007aff;
+    }
+
+    /* Dark mode overrides */
+    body.dark-mode {
+      --bg-color: #1c1c1e;
+      --text-color: #f2f2f7;
+      --module-bg: #2c2c2e;
+      --module-text: #f2f2f7;
+      --indicator-inactive: #999;
+      --indicator-active: #fff;
+      --button-bg: #444;
+      --button-hover-bg: #666;
+      --tap-button-bg: #3f8d3b;
+      --tap-button-hover: #357c33;
+      --trash-icon-color: #ff453a;
+      --border-color: #555;
+      --focus-border-color: #aaa;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
                    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background-color: #f2f2f7;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       margin: 0;
       padding: 20px;
-      color: #1c1c1e;
+      transition: background-color 0.3s, color 0.3s;
     }
     h1 {
       text-align: center;
@@ -38,18 +72,70 @@
       font-size: 1.8em;
     }
 
+    /* Top bar: refresh + dark mode toggle */
+    #topBar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    #refreshBtn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-color);
+      font-size: 1.5em;
+      display: flex;
+      align-items: center;
+    }
+
+    /* iOS-style switch for dark mode toggle */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 28px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #fff;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #007aff; /* you can adjust for dark mode style */
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
     /* Container holding all song modules */
     #songsContainer {
       margin-bottom: 15px;
     }
 
-    /* SONG MODULE LAYOUT (CSS Grid at all sizes)
-       Larger screens: 5 columns x 2 rows
-         Row 1: [Song Title Container] [BPM <select>] [Tap Tempo] [Time Sig] [ (empty) ]
-         Row 2: [ .beat-indicator spanning col 1..5 ] [ remove button col5 ]
-    */
+    /* SONG MODULE LAYOUT (CSS Grid) */
     .song-module {
-      background-color: #fff;
+      background-color: var(--module-bg);
+      color: var(--module-text);
       border-radius: 10px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       padding: 15px;
@@ -60,6 +146,7 @@
       grid-template-rows: auto auto; /* 2 rows */
       gap: 10px;
       align-items: center;
+      transition: background-color 0.3s, color 0.3s;
     }
 
     /* Song Title container: col1 row1 */
@@ -69,42 +156,44 @@
       display: flex;
       flex-direction: column;
     }
-    /* The displayed text of the song (once typed) */
     .song-display {
-      display: none; /* hidden until user finishes typing or has a stored value */
-      cursor: pointer; /* so user knows they can click to edit */
+      display: none;
+      cursor: pointer;
       word-wrap: break-word;
       white-space: pre-wrap;
       font-weight: 500;
     }
-    /* The input for the song (inline editing) */
     .song-input {
       padding: 8px;
       font-size: 1em;
-      border: 1px solid #ccc;
+      border: 1px solid var(--border-color);
       border-radius: 5px;
       outline: none;
       transition: border-color 0.2s;
       width: 100%;
       box-sizing: border-box;
+      background-color: var(--bg-color);
+      color: var(--text-color);
     }
     .song-input:focus {
-      border-color: #007aff;
+      border-color: var(--focus-border-color);
     }
 
     /* BPM <select>: col2 row1 */
     .bpm-select {
       padding: 8px;
       font-size: 1em;
-      border: 1px solid #ccc;
+      border: 1px solid var(--border-color);
       border-radius: 5px;
       outline: none;
       transition: border-color 0.2s;
       width: 100%;
       box-sizing: border-box;
+      background-color: var(--bg-color);
+      color: var(--text-color);
     }
     .bpm-select:focus {
-      border-color: #007aff;
+      border-color: var(--focus-border-color);
     }
 
     /* Tap Tempo => col3 row1 */
@@ -117,28 +206,30 @@
       font-size: 1em;
       border-radius: 6px;
       border: none;
-      background-color: #34c759; /* green for tap tempo */
+      background-color: var(--tap-button-bg);
       color: #fff;
       cursor: pointer;
       transition: background-color 0.2s;
     }
     .tap-tempo-btn:hover {
-      background-color: #2ea84c;
+      background-color: var(--tap-button-hover);
     }
 
     /* Time Sig => col4 row1 */
     .timesig-select {
       padding: 8px;
       font-size: 1em;
-      border: 1px solid #ccc;
+      border: 1px solid var(--border-color);
       border-radius: 5px;
       outline: none;
       transition: border-color 0.2s;
       width: 100%;
       box-sizing: border-box;
+      background-color: var(--bg-color);
+      color: var(--text-color);
     }
     .timesig-select:focus {
-      border-color: #007aff;
+      border-color: var(--focus-border-color);
     }
 
     /* .beat-indicator => col1..5, row2 */
@@ -146,6 +237,17 @@
       grid-column: 1 / 5;
       grid-row: 2;
       text-align: center;
+      transition: color 0.3s;
+    }
+    .beat-indicator span {
+      margin-right: 5px;
+      font-weight: bold;
+      color: var(--indicator-inactive);
+      font-size: 2em;
+      transition: color 0.2s;
+    }
+    .beat-indicator span.active {
+      color: var(--indicator-active);
     }
 
     /* remove-song-btn => col5, row2 (bottom right) */
@@ -156,26 +258,21 @@
       background: none;
       border: none;
       cursor: pointer;
-      color: #ff3b30;
+      color: var(--trash-icon-color);
       font-size: 1.8em;
       outline: none;
-    }
-
-    /* Beat indicator styling */
-    .beat-indicator span {
-      margin-right: 5px;
-      font-weight: bold;
-      color: #ccc;
-      font-size: 2em;
       transition: color 0.2s;
     }
-    .beat-indicator span.active {
-      color: #1c1c1e;
-    }
 
-    /* Modern styled buttons (Add Song / Copy URL) */
-    button {
-      background-color: #007aff;
+    /* Modern styled buttons (bottom bar) */
+    #bottomBar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    #bottomBar button {
+      background-color: var(--button-bg);
       border: none;
       border-radius: 10px;
       color: #fff;
@@ -183,10 +280,10 @@
       font-size: 1em;
       cursor: pointer;
       transition: background-color 0.2s;
-      margin: 5px;
+      margin: 5px 0;
     }
-    button:hover {
-      background-color: #005ecb;
+    #bottomBar button:hover {
+      background-color: var(--button-hover-bg);
     }
 
     /* SMALL SCREENS (max-width: 480px):
@@ -201,7 +298,7 @@
         grid-template-columns: 1fr 1fr;
         grid-template-rows: auto auto auto auto;
       }
-      /* Song Title => row1 col1 */
+      /* Song => row1 col1 */
       .song-title-container {
         grid-column: 1;
         grid-row: 1;
@@ -237,37 +334,71 @@
 </head>
 <body>
   <h1>Setlist Tempo Keeper</h1>
+
+  <!-- Top bar: refresh + dark mode switch -->
+  <div id="topBar">
+    <button id="refreshBtn" title="Clear setlist and reload"><ion-icon name="refresh-outline"></ion-icon></button>
+
+    <!-- iOS-style switch for dark mode -->
+    <label class="switch">
+      <input type="checkbox" id="darkModeToggle" />
+      <span class="slider"></span>
+    </label>
+  </div>
+
   <!-- Container where song modules will be appended -->
   <div id="songsContainer"></div>
-  <!-- Button to add a new song module -->
-  <button id="addSongBtn">+ Add Song</button>
-  <!-- Button to copy the current URL with all inputs as parameters (compressed) -->
-  <button id="copyUrlBtn">Copy URL with Values</button>
+
+  <!-- Bottom bar: + Add Song and Copy URL -->
+  <div id="bottomBar">
+    <button id="addSongBtn">+ Add Song</button>
+    <button id="copyUrlBtn">Copy URL</button>
+  </div>
 
   <script>
     let moduleCount = 0;
     const beatData = {}; // For intervals, beat counts
     const tapData = {};  // For tap tempo
 
-    /**
-     * Creates a song module with:
-     *  - Song Title (inline editing)
-     *  - BPM <select> (30..300, default 68)
-     *  - Tap Tempo button
-     *  - TimeSig <select>
-     *  - Beat indicator
-     *  - Remove button
-     */
+    /* ========== DARK MODE TOGGLE ========== */
+    function setDarkMode(isDark) {
+      if (isDark) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+      localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+      // Update the checkbox state
+      document.getElementById('darkModeToggle').checked = isDark;
+    }
+
+    function loadDarkModePreference() {
+      const saved = localStorage.getItem('darkMode');
+      if (saved === 'true') {
+        setDarkMode(true);
+      } else {
+        setDarkMode(false);
+      }
+    }
+
+    /* ========== REFRESH BUTTON ========== */
+    function refreshPage() {
+      // Clear ?data= by reloading the page without query params
+      const baseUrl = window.location.origin + window.location.pathname;
+      window.location.href = baseUrl; // full reload
+    }
+
+    /* ========== CREATE SONG MODULE ========== */
     function createSongModule(index, data = {}) {
       const container = document.createElement('div');
       container.className = 'song-module';
       container.dataset.index = index;
 
-      // SONG TITLE container
+      // Song Title container
       const songTitleContainer = document.createElement('div');
       songTitleContainer.className = 'song-title-container';
 
-      // Display text for the title
+      // Display text
       const songDisplay = document.createElement('span');
       songDisplay.className = 'song-display';
       songDisplay.title = "Click to edit title";
@@ -276,15 +407,14 @@
       const songInput = document.createElement('input');
       songInput.className = 'song-input';
       songInput.type = 'text';
-      songInput.placeholder = 'Add Song Title';
+      songInput.placeholder = 'e.g. Yet Not I But Through Christ In Me';
       songInput.value = data.song || '';
 
-      // Sync display text with input
+      // Sync display text
       function updateSongDisplay() {
         const val = songInput.value.trim();
         songDisplay.textContent = val || '';
       }
-
       // On blur, if there's a value, show the display
       songInput.addEventListener('blur', () => {
         updateSongDisplay();
@@ -297,14 +427,14 @@
           songDisplay.style.display = 'none';
         }
       });
-      // Clicking display text => revert to input
+      // Clicking display => revert to input
       songDisplay.addEventListener('click', () => {
         songDisplay.style.display = 'none';
         songInput.style.display = 'block';
         songInput.focus();
       });
 
-      // Initialize display if there's a stored title
+      // Initialize display
       updateSongDisplay();
       if (songInput.value.trim()) {
         songInput.style.display = 'none';
@@ -314,14 +444,13 @@
       songTitleContainer.appendChild(songDisplay);
       songTitleContainer.appendChild(songInput);
 
-      // BPM <select> (30..300, default 68)
+      // BPM <select> (30..300, default 68 if no data)
       const bpmSelect = document.createElement('select');
       bpmSelect.className = 'bpm-select';
       for (let i = 30; i <= 300; i++) {
         const opt = document.createElement('option');
         opt.value = i;
         opt.textContent = i;
-        // If we have a saved BPM, use that. Otherwise default to 68
         if (data.bpm ? (i === +data.bpm) : (i === 68)) {
           opt.selected = true;
         }
@@ -345,7 +474,6 @@
         if (data.timeSig) {
           if (ts === data.timeSig) opt.selected = true;
         } else {
-          // default to 4/4 if no data
           if (ts === '4/4') opt.selected = true;
         }
         timesigSelect.appendChild(opt);
@@ -392,35 +520,29 @@
       return container;
     }
 
-    /**
-     * Tap Tempo: Time between last two taps => BPM
-     */
+    /* Tap Tempo: time between last two taps => BPM */
     function handleTapTempo(index) {
       const now = performance.now();
       if (!tapData[index]) return;
 
       const lastTap = tapData[index].lastTapTime;
       if (lastTap > 0) {
-        const diff = now - lastTap; // ms between taps
+        const diff = now - lastTap;
         const newBpm = Math.round(60000 / diff);
 
         const moduleEl = document.querySelector(`.song-module[data-index="${index}"]`);
         if (!moduleEl) return;
         const bpmSelect = moduleEl.querySelector('.bpm-select');
 
-        // If newBpm is out of range, clamp it
+        // clamp BPM to 30..300
         const clampedBpm = Math.max(30, Math.min(newBpm, 300));
         bpmSelect.value = clampedBpm;
-
-        // Refresh beat indicator
         updateBeatIndicator(index);
       }
       tapData[index].lastTapTime = now;
     }
 
-    /**
-     * Sets up (or resets) the beat indicator for the module with the given index.
-     */
+    /* Set up or reset the beat indicator */
     function updateBeatIndicator(index) {
       const moduleEl = document.querySelector(`.song-module[data-index="${index}"]`);
       if (!moduleEl) return;
@@ -428,7 +550,6 @@
       const timesigSelect = moduleEl.querySelector('.timesig-select');
       const beatIndicator = moduleEl.querySelector('.beat-indicator');
 
-      // Clear any existing interval
       if (beatData[index] && beatData[index].intervalId) {
         clearInterval(beatData[index].intervalId);
       }
@@ -441,14 +562,12 @@
       }
       const topNumber = parseInt(timesigSelect.value.split('/')[0], 10);
 
-      // Generate beat numbers
       let beatHTML = '';
       for (let i = 1; i <= topNumber; i++) {
         beatHTML += `<span data-beat="${i}">${i}</span> `;
       }
       beatIndicator.innerHTML = beatHTML;
 
-      // Interval in ms
       const intervalMs = (60 / bpm) * 1000;
       beatData[index].intervalId = setInterval(() => {
         beatData[index].beatCount++;
@@ -461,9 +580,7 @@
       }, intervalMs);
     }
 
-    /**
-     * Build a compressed URL with all modules' data.
-     */
+    /* Build compressed URL */
     function buildUrlWithValues() {
       const modules = document.querySelectorAll('.song-module');
       const allData = [];
@@ -478,26 +595,7 @@
       return window.location.origin + window.location.pathname + '?data=' + compressed;
     }
 
-    /**
-     * Copy the given URL to clipboard, then reload the page with that URL.
-     */
-    function copyUrlAndReload(newUrl) {
-      navigator.clipboard.writeText(newUrl)
-        .then(() => {
-          alert('URL copied to clipboard:\n' + newUrl);
-          // Reload with the new URL so the address bar matches
-          window.location.href = newUrl;
-        })
-        .catch((err) => {
-          alert('Error copying URL: ' + err);
-          // Even if copying fails, reload with new URL
-          window.location.href = newUrl;
-        });
-    }
-
-    /**
-     * Load modules from the compressed "data" param, or create one default module.
-     */
+    /* Load from URL or create a default module */
     function loadFromUrlParams() {
       const params = new URLSearchParams(window.location.search);
       const compressedData = params.get('data');
@@ -525,9 +623,7 @@
       }
     }
 
-    /**
-     * Add a new song module and immediately update its beat indicator.
-     */
+    /* Add a new module & update its indicator */
     function addSongModule(data = {}) {
       moduleCount++;
       const module = createSongModule(moduleCount, data);
@@ -535,17 +631,43 @@
       updateBeatIndicator(moduleCount);
     }
 
-    // Event listeners for main buttons
-    document.getElementById('addSongBtn').addEventListener('click', () => {
-      addSongModule();
-    });
-    document.getElementById('copyUrlBtn').addEventListener('click', () => {
-      const newUrl = buildUrlWithValues();
-      copyUrlAndReload(newUrl);
-    });
+    /* Refresh: clear ?data= and reload */
+    function refreshPage() {
+      const baseUrl = window.location.origin + window.location.pathname;
+      window.location.href = baseUrl; // full reload
+    }
 
-    // Initialize on page load
-    window.addEventListener('DOMContentLoaded', loadFromUrlParams);
+    /* On page load */
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1) Dark mode preference
+      loadDarkModePreference();
+      // Toggle with the switch
+      const darkModeToggle = document.getElementById('darkModeToggle');
+      darkModeToggle.addEventListener('change', () => {
+        setDarkMode(darkModeToggle.checked);
+      });
+
+      // 2) Load modules from URL
+      loadFromUrlParams();
+
+      // 3) Setup top bar
+      document.getElementById('refreshBtn').addEventListener('click', refreshPage);
+
+      // 4) Bottom bar: +Add Song, Copy URL
+      document.getElementById('addSongBtn').addEventListener('click', () => {
+        addSongModule();
+      });
+      document.getElementById('copyUrlBtn').addEventListener('click', () => {
+        const newUrl = buildUrlWithValues();
+        navigator.clipboard.writeText(newUrl).then(() => {
+          alert('URL copied to clipboard:\n' + newUrl);
+          // Also update browser nav so it matches
+          window.history.replaceState({}, '', newUrl);
+        }).catch(err => {
+          alert('Error copying URL: ' + err);
+        });
+      });
+    });
   </script>
 </body>
 </html>
