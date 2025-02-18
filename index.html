@@ -4,10 +4,23 @@
   <meta charset="UTF-8">
   <!-- Ensure proper scaling on mobile devices -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Favicon: Inline SVG of a metronome -->
+  <link
+    rel="icon"
+    type="image/svg+xml"
+    href="data:image/svg+xml,<svg%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E<path%20d%3D%22M32%204%20L12%2056%20h40%20L32%204%20z%22%20fill%3D%22%231c1c1e%22%2F><path%20d%3D%22M32%2016%20v24%22%20stroke%3D%22%23fff%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%2F>%3C%2Fsvg%3E"
+  />
+
   <title>Setlist Tempo Keeper</title>
+
   <!-- Ionicons for modern icons -->
   <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+  <!-- LZ-String library for client-side compression -->
+  <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
+
   <style>
     /* Use system fonts similar to iOS defaults */
     body {
@@ -133,7 +146,7 @@
   <div id="songsContainer"></div>
   <!-- Button to add a new song module -->
   <button id="addSongBtn">+ Add Song</button>
-  <!-- Button to copy the current URL with all inputs as parameters -->
+  <!-- Button to copy the current URL with all inputs as parameters (compressed) -->
   <button id="copyUrlBtn">Copy URL with Values</button>
 
   <script>
@@ -156,10 +169,21 @@
       inputsDiv.className = 'inputs';
       inputsDiv.innerHTML = `
         <label>Song:
-          <input type="text" class="song-input" value="${data.song || ''}" placeholder="Song Name">
+          <input
+            type="text"
+            class="song-input"
+            value="${data.song || ''}"
+            placeholder="e.g. Yet Not I But Through Christ In Me"
+          >
         </label>
         <label>BPM:
-          <input type="number" class="bpm-input" value="${data.bpm || ''}" placeholder="Tempo" min="1">
+          <input
+            type="number"
+            class="bpm-input"
+            value="${data.bpm || ''}"
+            placeholder="e.g. 75"
+            min="1"
+          >
         </label>
         <label>Time Sig:
           <select class="timesig-input">
@@ -251,41 +275,66 @@
     }
 
     /**
-     * Builds a URL containing current values from all song modules.
+     * Builds a compressed URL containing current values from all song modules.
+     * Uses LZ-String to compress the data into a single "data" parameter.
      */
     function buildUrlWithValues() {
-      const params = new URLSearchParams();
+      // 1) Gather all modules data into an array
       const modules = document.querySelectorAll('.song-module');
-      modules.forEach((module, idx) => {
-        const index = idx + 1;
+      const allData = [];
+      modules.forEach((module) => {
         const songVal = module.querySelector('.song-input').value;
         const bpmVal = module.querySelector('.bpm-input').value;
         const timeSigVal = module.querySelector('.timesig-input').value;
-        if (songVal) params.set('song' + index, encodeURIComponent(songVal));
-        if (bpmVal) params.set('bpm' + index, bpmVal);
-        if (timeSigVal) params.set('timeSig' + index, timeSigVal);
+        allData.push({ song: songVal, bpm: bpmVal, timeSig: timeSigVal });
       });
-      return window.location.origin + window.location.pathname + '?' + params.toString();
+
+      // 2) Convert to JSON
+      const jsonString = JSON.stringify(allData);
+
+      // 3) Compress and encode
+      const compressed = LZString.compressToEncodedURIComponent(jsonString);
+
+      // 4) Build final URL with ?data= param
+      return window.location.origin + window.location.pathname + '?data=' + compressed;
     }
 
     /**
-     * Loads song modules from URL parameters. If none exist, adds one default module.
+     * Loads song modules from a single compressed "data" parameter.
+     * If none exists, adds one default module.
      */
     function loadFromUrlParams() {
       const params = new URLSearchParams(window.location.search);
-      let i = 1, found = false;
-      while (params.has('song' + i) || params.has('bpm' + i) || params.has('timeSig' + i)) {
-        found = true;
-        const data = {
-          song: params.get('song' + i) ? decodeURIComponent(params.get('song' + i)) : '',
-          bpm: params.get('bpm' + i) || '',
-          timeSig: params.get('timeSig' + i) || ''
-        };
-        addSongModule(data);
-        i++;
+      const compressedData = params.get('data');
+
+      if (!compressedData) {
+        // No data param found; just add one default module
+        addSongModule();
+        return;
       }
-      if (!found) {
-        addSongModule(); // Add one default module if no URL data is found.
+
+      // Decompress
+      const jsonString = LZString.decompressFromEncodedURIComponent(compressedData);
+      if (!jsonString) {
+        // If decompression fails, fallback
+        addSongModule();
+        return;
+      }
+
+      // Parse the JSON array
+      let allData;
+      try {
+        allData = JSON.parse(jsonString);
+      } catch (e) {
+        addSongModule();
+        return;
+      }
+
+      // allData is an array of {song, bpm, timeSig}
+      if (Array.isArray(allData) && allData.length > 0) {
+        allData.forEach((item) => addSongModule(item));
+      } else {
+        addSongModule();
       }
     }
 
@@ -306,15 +355,15 @@
     });
 
     document.getElementById('copyUrlBtn').addEventListener('click', () => {
-      const url = buildUrlWithValues();
-      navigator.clipboard.writeText(url).then(() => {
-        alert('URL copied to clipboard:\n' + url);
+      const newUrl = buildUrlWithValues();
+      navigator.clipboard.writeText(newUrl).then(() => {
+        alert('URL copied to clipboard:\n' + newUrl);
       }).catch(err => {
         alert('Error copying URL: ' + err);
       });
     });
 
-    // Load song modules from URL parameters (or add one default) on page load.
+    // Load compressed data from URL on page load (or add one default module).
     window.addEventListener('DOMContentLoaded', () => {
       loadFromUrlParams();
     });
