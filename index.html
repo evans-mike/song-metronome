@@ -413,7 +413,11 @@
       // Sync display text
       function updateSongDisplay() {
         const val = songInput.value.trim();
-        songDisplay.textContent = val || '';
+        if (val) {
+          songDisplay.innerHTML = '<ion-icon name="create-outline" class="edit-icon"></ion-icon> ' + val;
+        } else {
+          songDisplay.innerHTML = '';
+        }
       }
       // On blur, if there's a value, show the display
       songInput.addEventListener('blur', () => {
