@@ -506,13 +506,18 @@
 
       // Remove logic
       removeBtn.addEventListener('click', () => {
+      // Show a confirmation prompt before removing
+      if (confirm("Are you sure you want to remove this song?")) {
+        // Clear any running interval for this module.
         if (beatData[index] && beatData[index].intervalId) {
           clearInterval(beatData[index].intervalId);
           delete beatData[index];
         }
+        // Clear tap data and remove the module DOM element
         delete tapData[index];
         container.remove();
-      });
+      }
+    });
 
       // BPM & TimeSig -> update beat indicator
       bpmSelect.addEventListener('change', () => updateBeatIndicator(index));
