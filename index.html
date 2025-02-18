@@ -45,8 +45,8 @@
 
     /* SONG MODULE LAYOUT (CSS Grid at all sizes)
        Larger screens: 5 columns x 2 rows
-         Row 1: [Song] [BPM] [Tap Tempo] [Time Sig] [ (empty) ]
-         Row 2: [ .beat-indicator spanning col 1..5 ] [ remove button in col 5, bottom right ]
+         Row 1: [Song Title Container] [BPM <select>] [Tap Tempo] [Time Sig] [ (empty) ]
+         Row 2: [ .beat-indicator spanning col 1..5 ] [ remove button col5 ]
     */
     .song-module {
       background-color: #fff;
@@ -56,44 +56,58 @@
       margin-bottom: 15px;
 
       display: grid;
-      /* 5 columns: 
-          col1 => Song
-          col2 => BPM
-          col3 => Tap Tempo
-          col4 => Time Sig
-          col5 => remove button 
-      */
-      grid-template-columns: 1fr 1fr auto 1fr auto;
-      /* 2 rows:
-         row1 => top row for inputs / tap button
-         row2 => bottom row for beat indicator + remove button
-      */
-      grid-template-rows: auto auto;
+      grid-template-columns: 1fr auto auto 1fr auto; /* 5 columns */
+      grid-template-rows: auto auto; /* 2 rows */
       gap: 10px;
       align-items: center;
     }
 
-    /* .inputs uses "display: contents" so each label is a grid child */
-    .inputs {
-      display: contents;
-    }
-
-    /* Large screen placement:
-       label(1) => col1 row1 (Song)
-       label(2) => col2 row1 (BPM)
-       Tap Tempo => col3 row1
-       label(3) => col4 row1 (TimeSig)
-       .beat-indicator => col1..5 row2
-       .remove-song-btn => col5 row2 (bottom right)
-    */
-    .inputs label:nth-of-type(1) {
+    /* Song Title container: col1 row1 */
+    .song-title-container {
       grid-column: 1;
       grid-row: 1;
+      display: flex;
+      flex-direction: column;
     }
-    .inputs label:nth-of-type(2) {
-      grid-column: 2;
-      grid-row: 1;
+    /* The displayed text of the song (once typed) */
+    .song-display {
+      display: none; /* hidden until user finishes typing or has a stored value */
+      cursor: pointer; /* so user knows they can click to edit */
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      font-weight: 500;
     }
+    /* The input for the song (inline editing) */
+    .song-input {
+      padding: 8px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .song-input:focus {
+      border-color: #007aff;
+    }
+
+    /* BPM <select>: col2 row1 */
+    .bpm-select {
+      padding: 8px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .bpm-select:focus {
+      border-color: #007aff;
+    }
+
+    /* Tap Tempo => col3 row1 */
     .tap-tempo-btn {
       grid-column: 3;
       grid-row: 1;
@@ -111,16 +125,30 @@
     .tap-tempo-btn:hover {
       background-color: #2ea84c;
     }
-    .inputs label:nth-of-type(3) {
-      grid-column: 4;
-      grid-row: 1;
+
+    /* Time Sig => col4 row1 */
+    .timesig-select {
+      padding: 8px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .timesig-select:focus {
+      border-color: #007aff;
     }
 
+    /* .beat-indicator => col1..5, row2 */
     .beat-indicator {
-      grid-column: 1 / 5; /* spans columns 1..4 */
+      grid-column: 1 / 5;
       grid-row: 2;
       text-align: center;
     }
+
+    /* remove-song-btn => col5, row2 (bottom right) */
     .remove-song-btn {
       grid-column: 5;
       grid-row: 2;
@@ -131,30 +159,6 @@
       color: #ff3b30;
       font-size: 1.8em;
       outline: none;
-    }
-
-    /* Shared styling for labels & inputs */
-    .inputs label {
-      font-size: 0.95em;
-      margin-right: 5px;
-      display: block; /* For better spacing on small screens */
-    }
-    .inputs input[type="text"],
-    .inputs input[type="number"],
-    .inputs select {
-      padding: 8px;
-      font-size: 1em;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      outline: none;
-      transition: border-color 0.2s;
-      width: 100%; /* fill label width */
-      box-sizing: border-box;
-    }
-    .inputs input[type="text"]:focus,
-    .inputs input[type="number"]:focus,
-    .inputs select:focus {
-      border-color: #007aff;
     }
 
     /* Beat indicator styling */
@@ -187,34 +191,34 @@
 
     /* SMALL SCREENS (max-width: 480px):
        2 columns x 4 rows
-         Row 1: [Song (col1)] [Tap Tempo (col2)]
-         Row 2: [BPM (col1)]  [Time Sig (col2)]
-         Row 3: [ .beat-indicator spanning col 1..2 ]
-         Row 4: [ (empty col1) remove-song-btn col2 (bottom right) ]
+         Row 1: [Song Title col1] [Tap Tempo col2]
+         Row 2: [BPM col1] [Time Sig col2]
+         Row 3: [.beat-indicator col1..2]
+         Row 4: [ (empty col1) remove col2 (bottom right) ]
     */
     @media (max-width: 480px) {
       .song-module {
         grid-template-columns: 1fr 1fr;
         grid-template-rows: auto auto auto auto;
       }
-      /* Song => row1 col1 */
-      .inputs label:nth-of-type(1) {
+
+      /* Song Title => row1 col1 */
+      .song-title-container {
         grid-column: 1;
         grid-row: 1;
       }
-      /* Tap Tempo => row1 col2 */
+      /* Tap => row1 col2 */
       .tap-tempo-btn {
         grid-column: 2;
         grid-row: 1;
-        justify-self: center;
       }
       /* BPM => row2 col1 */
-      .inputs label:nth-of-type(2) {
+      .bpm-select {
         grid-column: 1;
         grid-row: 2;
       }
       /* Time Sig => row2 col2 */
-      .inputs label:nth-of-type(3) {
+      .timesig-select {
         grid-column: 2;
         grid-row: 2;
       }
@@ -222,7 +226,6 @@
       .beat-indicator {
         grid-column: 1 / 3;
         grid-row: 3;
-        text-align: center;
       }
       /* Remove => row4 col2, bottom right */
       .remove-song-btn {
@@ -243,17 +246,16 @@
   <button id="copyUrlBtn">Copy URL with Values</button>
 
   <script>
-    // Global module counter and beat data storage for each module.
     let moduleCount = 0;
     const beatData = {}; // For intervals, beat counts
     const tapData = {};  // For tap tempo
 
     /**
      * Creates a song module with:
-     *  - Song input
-     *  - BPM input
+     *  - Song Title (inline editing)
+     *  - BPM <select> (scrollable numeric options 30..300, default 68)
      *  - Tap Tempo button
-     *  - TimeSig input
+     *  - TimeSig <select>
      *  - Beat indicator
      *  - Remove button
      */
@@ -262,44 +264,94 @@
       container.className = 'song-module';
       container.dataset.index = index;
 
-      // The .inputs div
-      const inputsDiv = document.createElement('div');
-      inputsDiv.className = 'inputs';
-      inputsDiv.innerHTML = `
-        <label>
-          <input
-            type="text"
-            class="song-input"
-            value="${data.song || ''}"
-            placeholder="Song Title"
-          >
-        </label>
-        <label>
-          <input
-            type="number"
-            class="bpm-input"
-            value="${data.bpm || ''}"
-            placeholder="BPM"
-            min="1"
-          >
-        </label>
-        <label>
-          <select class="timesig-input">
-            <option value="2/2" ${data.timeSig === '2/2' ? 'selected' : ''}>2/2</option>
-            <option value="3/4" ${data.timeSig === '3/4' ? 'selected' : ''}>3/4</option>
-            <option value="4/4" ${(!data.timeSig || data.timeSig === '4/4') ? 'selected' : ''}>4/4</option>
-            <option value="6/8" ${data.timeSig === '6/8' ? 'selected' : ''}>6/8</option>
-            <option value="9/8" ${data.timeSig === '9/8' ? 'selected' : ''}>9/8</option>
-            <option value="12/8" ${data.timeSig === '12/8' ? 'selected' : ''}>12/8</option>
-          </select>
-        </label>
-      `;
+      // SONG TITLE container
+      const songTitleContainer = document.createElement('div');
+      songTitleContainer.className = 'song-title-container';
+
+      // Display text for the title
+      const songDisplay = document.createElement('span');
+      songDisplay.className = 'song-display';
+      songDisplay.title = "Click to edit title";
+
+      // Input for editing the title
+      const songInput = document.createElement('input');
+      songInput.className = 'song-input';
+      songInput.type = 'text';
+      songInput.placeholder = 'e.g. Yet Not I But Through Christ In Me';
+      songInput.value = data.song || '';
+
+      // Sync display text with input
+      function updateSongDisplay() {
+        const val = songInput.value.trim();
+        songDisplay.textContent = val || '';
+      }
+
+      // On blur, if there's a value, show the display
+      songInput.addEventListener('blur', () => {
+        updateSongDisplay();
+        const val = songInput.value.trim();
+        if (val) {
+          songInput.style.display = 'none';
+          songDisplay.style.display = 'block';
+        } else {
+          songInput.style.display = 'block';
+          songDisplay.style.display = 'none';
+        }
+      });
+      // Clicking display text => revert to input
+      songDisplay.addEventListener('click', () => {
+        songDisplay.style.display = 'none';
+        songInput.style.display = 'block';
+        songInput.focus();
+      });
+
+      // Initialize display if there's a stored title
+      updateSongDisplay();
+      if (songInput.value.trim()) {
+        songInput.style.display = 'none';
+        songDisplay.style.display = 'block';
+      }
+
+      songTitleContainer.appendChild(songDisplay);
+      songTitleContainer.appendChild(songInput);
+
+      // BPM <select> (from 30..300, default 68 if no data)
+      const bpmSelect = document.createElement('select');
+      bpmSelect.className = 'bpm-select';
+      // Populate numeric options
+      for (let i = 30; i <= 300; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = i;
+        // If we have a saved BPM, use that. Otherwise default to 68
+        if (data.bpm ? (i === +data.bpm) : (i === 68)) {
+          opt.selected = true;
+        }
+        bpmSelect.appendChild(opt);
+      }
 
       // Tap Tempo button
       const tapTempoBtn = document.createElement('button');
       tapTempoBtn.className = 'tap-tempo-btn';
       tapTempoBtn.type = 'button';
       tapTempoBtn.textContent = 'Tap';
+
+      // TimeSig <select>
+      const timesigSelect = document.createElement('select');
+      timesigSelect.className = 'timesig-select';
+      const timesigOptions = ['2/2','3/4','4/4','6/8','9/8','12/8'];
+      timesigOptions.forEach(ts => {
+        const opt = document.createElement('option');
+        opt.value = ts;
+        opt.textContent = ts;
+        if (data.timeSig) {
+          if (ts === data.timeSig) opt.selected = true;
+        } else {
+          // default to 4/4 if no data
+          if (ts === '4/4') opt.selected = true;
+        }
+        timesigSelect.appendChild(opt);
+      });
 
       // Beat indicator
       const beatIndicator = document.createElement('div');
@@ -311,18 +363,19 @@
       removeBtn.title = "Remove this song";
       removeBtn.innerHTML = '<ion-icon name="trash-outline"></ion-icon>';
 
-      // Append in grid order: inputs, tap button, beat indicator, remove
-      container.appendChild(inputsDiv);
-      container.appendChild(tapTempoBtn);
-      container.appendChild(beatIndicator);
-      container.appendChild(removeBtn);
+      // Append in grid order
+      container.appendChild(songTitleContainer); // col1
+      container.appendChild(bpmSelect);          // col2
+      container.appendChild(tapTempoBtn);        // col3
+      container.appendChild(timesigSelect);      // col4
+      container.appendChild(beatIndicator);      // row2
+      container.appendChild(removeBtn);          // row2 col5
 
-      // Initialize tap data
+      // Tap data
       tapData[index] = { lastTapTime: 0 };
 
-      // Listen for remove
+      // Remove logic
       removeBtn.addEventListener('click', () => {
-        // Clear interval
         if (beatData[index] && beatData[index].intervalId) {
           clearInterval(beatData[index].intervalId);
           delete beatData[index];
@@ -331,11 +384,9 @@
         container.remove();
       });
 
-      // BPM & Time Sig -> update beat indicator
-      const bpmInput = inputsDiv.querySelector('.bpm-input');
-      const timeSigInput = inputsDiv.querySelector('.timesig-input');
-      bpmInput.addEventListener('input', () => updateBeatIndicator(index));
-      timeSigInput.addEventListener('change', () => updateBeatIndicator(index));
+      // BPM & TimeSig -> update beat indicator
+      bpmSelect.addEventListener('change', () => updateBeatIndicator(index));
+      timesigSelect.addEventListener('change', () => updateBeatIndicator(index));
 
       // Tap Tempo
       tapTempoBtn.addEventListener('click', () => handleTapTempo(index));
@@ -354,11 +405,15 @@
       if (lastTap > 0) {
         const diff = now - lastTap; // ms between taps
         const newBpm = Math.round(60000 / diff);
-        // Update BPM
+
         const moduleEl = document.querySelector(`.song-module[data-index="${index}"]`);
         if (!moduleEl) return;
-        const bpmInput = moduleEl.querySelector('.bpm-input');
-        bpmInput.value = newBpm;
+        const bpmSelect = moduleEl.querySelector('.bpm-select');
+
+        // If newBpm is out of range, clamp it
+        const clampedBpm = Math.max(30, Math.min(newBpm, 300));
+        bpmSelect.value = clampedBpm;
+
         // Refresh beat indicator
         updateBeatIndicator(index);
       }
@@ -371,8 +426,8 @@
     function updateBeatIndicator(index) {
       const moduleEl = document.querySelector(`.song-module[data-index="${index}"]`);
       if (!moduleEl) return;
-      const bpmInput = moduleEl.querySelector('.bpm-input');
-      const timeSigInput = moduleEl.querySelector('.timesig-input');
+      const bpmSelect = moduleEl.querySelector('.bpm-select');
+      const timesigSelect = moduleEl.querySelector('.timesig-select');
       const beatIndicator = moduleEl.querySelector('.beat-indicator');
 
       // Clear any existing interval
@@ -381,12 +436,12 @@
       }
       beatData[index] = { intervalId: null, beatCount: 0 };
 
-      const bpm = Number(bpmInput.value);
+      const bpm = Number(bpmSelect.value);
       if (!bpm || bpm <= 0) {
         beatIndicator.innerHTML = '';
         return;
       }
-      const topNumber = parseInt(timeSigInput.value.split('/')[0], 10);
+      const topNumber = parseInt(timesigSelect.value.split('/')[0], 10);
 
       // Generate beat numbers
       let beatHTML = '';
@@ -416,8 +471,8 @@
       const allData = [];
       modules.forEach((module) => {
         const songVal = module.querySelector('.song-input').value;
-        const bpmVal = module.querySelector('.bpm-input').value;
-        const timeSigVal = module.querySelector('.timesig-input').value;
+        const bpmVal = module.querySelector('.bpm-select').value;
+        const timeSigVal = module.querySelector('.timesig-select').value;
         allData.push({ song: songVal, bpm: bpmVal, timeSig: timeSigVal });
       });
       const jsonString = JSON.stringify(allData);
