@@ -37,31 +37,107 @@
       font-weight: 600;
       font-size: 1.8em;
     }
+
     /* Container holding all song modules */
     #songsContainer {
       margin-bottom: 15px;
     }
 
-    /* Song module styling */
+    /* SONG MODULE LAYOUT (CSS Grid at all sizes)
+       Larger screens: 5 columns x 2 rows
+         Row 1: [Song] [BPM] [Tap Tempo] [Time Sig] [ (empty) ]
+         Row 2: [ .beat-indicator spanning col 1..5 ] [ remove button in col 5, bottom right ]
+    */
     .song-module {
       background-color: #fff;
       border-radius: 10px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       padding: 15px;
       margin-bottom: 15px;
-      display: flex;              /* flex layout */
-      align-items: center;        /* vertically center content */
-      gap: 20px;                  /* spacing between sections */
-    }
-    /* Left section: Song name, BPM, TimeSig inputs */
-    .inputs {
-      display: flex;
-      flex-wrap: wrap;
+
+      display: grid;
+      /* 5 columns: 
+          col1 => Song
+          col2 => BPM
+          col3 => Tap Tempo
+          col4 => Time Sig
+          col5 => remove button 
+      */
+      grid-template-columns: 1fr 1fr auto 1fr auto;
+      /* 2 rows:
+         row1 => top row for inputs / tap button
+         row2 => bottom row for beat indicator + remove button
+      */
+      grid-template-rows: auto auto;
       gap: 10px;
+      align-items: center;
     }
+
+    /* .inputs uses "display: contents" so each label is a grid child */
+    .inputs {
+      display: contents;
+    }
+
+    /* Large screen placement:
+       label(1) => col1 row1 (Song)
+       label(2) => col2 row1 (BPM)
+       Tap Tempo => col3 row1
+       label(3) => col4 row1 (TimeSig)
+       .beat-indicator => col1..5 row2
+       .remove-song-btn => col5 row2 (bottom right)
+    */
+    .inputs label:nth-of-type(1) {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .inputs label:nth-of-type(2) {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .tap-tempo-btn {
+      grid-column: 3;
+      grid-row: 1;
+      align-self: center;
+      justify-self: center;
+      padding: 8px 12px;
+      font-size: 1em;
+      border-radius: 6px;
+      border: none;
+      background-color: #34c759; /* green for tap tempo */
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .tap-tempo-btn:hover {
+      background-color: #2ea84c;
+    }
+    .inputs label:nth-of-type(3) {
+      grid-column: 4;
+      grid-row: 1;
+    }
+
+    .beat-indicator {
+      grid-column: 1 / 5; /* spans columns 1..4 */
+      grid-row: 2;
+      text-align: center;
+    }
+    .remove-song-btn {
+      grid-column: 5;
+      grid-row: 2;
+      justify-self: end;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #ff3b30;
+      font-size: 1.8em;
+      outline: none;
+    }
+
+    /* Shared styling for labels & inputs */
     .inputs label {
       font-size: 0.95em;
       margin-right: 5px;
+      display: block; /* For better spacing on small screens */
     }
     .inputs input[type="text"],
     .inputs input[type="number"],
@@ -72,6 +148,8 @@
       border-radius: 5px;
       outline: none;
       transition: border-color 0.2s;
+      width: 100%; /* fill label width */
+      box-sizing: border-box;
     }
     .inputs input[type="text"]:focus,
     .inputs input[type="number"]:focus,
@@ -79,7 +157,7 @@
       border-color: #007aff;
     }
 
-    /* Middle section: Beat indicator */
+    /* Beat indicator styling */
     .beat-indicator span {
       margin-right: 5px;
       font-weight: bold;
@@ -91,18 +169,7 @@
       color: #1c1c1e;
     }
 
-    /* Right section: Remove button (trash icon) */
-    .remove-song-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #ff3b30;
-      font-size: 1.8em;
-      outline: none;
-      margin-left: auto;  /* pushes the icon to the far right */
-    }
-
-    /* Modern styled buttons */
+    /* Modern styled buttons (Add Song / Copy URL) */
     button {
       background-color: #007aff;
       border: none;
@@ -118,24 +185,50 @@
       background-color: #005ecb;
     }
 
-    /* Responsive adjustments for small screens */
+    /* SMALL SCREENS (max-width: 480px):
+       2 columns x 4 rows
+         Row 1: [Song (col1)] [Tap Tempo (col2)]
+         Row 2: [BPM (col1)]  [Time Sig (col2)]
+         Row 3: [ .beat-indicator spanning col 1..2 ]
+         Row 4: [ (empty col1) remove-song-btn col2 (bottom right) ]
+    */
     @media (max-width: 480px) {
       .song-module {
-        flex-direction: column;   /* stack vertically */
-        align-items: stretch;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto auto auto;
       }
-      .inputs, .beat-indicator, .remove-song-btn {
-        margin-right: 0;
-        width: 100%;
+      /* Song => row1 col1 */
+      .inputs label:nth-of-type(1) {
+        grid-column: 1;
+        grid-row: 1;
       }
+      /* Tap Tempo => row1 col2 */
+      .tap-tempo-btn {
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: center;
+      }
+      /* BPM => row2 col1 */
+      .inputs label:nth-of-type(2) {
+        grid-column: 1;
+        grid-row: 2;
+      }
+      /* Time Sig => row2 col2 */
+      .inputs label:nth-of-type(3) {
+        grid-column: 2;
+        grid-row: 2;
+      }
+      /* Beat => row3 col1..2 */
       .beat-indicator {
-        margin-top: 10px;
-        text-align: left;  /* numbers left-aligned */
+        grid-column: 1 / 3;
+        grid-row: 3;
+        text-align: center;
       }
+      /* Remove => row4 col2, bottom right */
       .remove-song-btn {
-        align-self: flex-end;
-        margin-top: 10px;
-        margin-left: 0;
+        grid-column: 2;
+        grid-row: 4;
+        justify-self: end;
       }
     }
   </style>
@@ -152,23 +245,28 @@
   <script>
     // Global module counter and beat data storage for each module.
     let moduleCount = 0;
-    const beatData = {}; // Stores intervalId and beatCount for each module
+    const beatData = {}; // For intervals, beat counts
+    const tapData = {};  // For tap tempo
 
     /**
-     * Creates and returns a song module (a DOM element) with its inputs, beat indicator, and remove button.
-     * @param {number} index - The song module number.
-     * @param {object} data - Optional initial data: { song, bpm, timeSig }.
+     * Creates a song module with:
+     *  - Song input
+     *  - BPM input
+     *  - Tap Tempo button
+     *  - TimeSig input
+     *  - Beat indicator
+     *  - Remove button
      */
     function createSongModule(index, data = {}) {
       const container = document.createElement('div');
       container.className = 'song-module';
       container.dataset.index = index;
 
-      // Left section: inputs
+      // The .inputs div
       const inputsDiv = document.createElement('div');
       inputsDiv.className = 'inputs';
       inputsDiv.innerHTML = `
-        <label>Song:
+        <label>
           <input
             type="text"
             class="song-input"
@@ -176,7 +274,7 @@
             placeholder="e.g. Yet Not I But Through Christ In Me"
           >
         </label>
-        <label>BPM:
+        <label>
           <input
             type="number"
             class="bpm-input"
@@ -185,7 +283,7 @@
             min="1"
           >
         </label>
-        <label>Time Sig:
+        <label>
           <select class="timesig-input">
             <option value="2/2" ${data.timeSig === '2/2' ? 'selected' : ''}>2/2</option>
             <option value="3/4" ${data.timeSig === '3/4' ? 'selected' : ''}>3/4</option>
@@ -197,41 +295,78 @@
         </label>
       `;
 
-      // Middle section: beat indicator
+      // Tap Tempo button
+      const tapTempoBtn = document.createElement('button');
+      tapTempoBtn.className = 'tap-tempo-btn';
+      tapTempoBtn.type = 'button';
+      tapTempoBtn.textContent = 'Tap';
+
+      // Beat indicator
       const beatIndicator = document.createElement('div');
       beatIndicator.className = 'beat-indicator';
 
-      // Right section: remove button
+      // Remove button
       const removeBtn = document.createElement('button');
       removeBtn.className = 'remove-song-btn';
       removeBtn.title = "Remove this song";
       removeBtn.innerHTML = '<ion-icon name="trash-outline"></ion-icon>';
+
+      // Append in grid order: inputs, tap button, beat indicator, remove
+      container.appendChild(inputsDiv);
+      container.appendChild(tapTempoBtn);
+      container.appendChild(beatIndicator);
+      container.appendChild(removeBtn);
+
+      // Initialize tap data
+      tapData[index] = { lastTapTime: 0 };
+
+      // Listen for remove
       removeBtn.addEventListener('click', () => {
-        // Clear any running interval for this module.
+        // Clear interval
         if (beatData[index] && beatData[index].intervalId) {
           clearInterval(beatData[index].intervalId);
           delete beatData[index];
         }
+        delete tapData[index];
         container.remove();
       });
 
-      // Append sections in order: inputs, beat indicator, remove button
-      container.appendChild(inputsDiv);
-      container.appendChild(beatIndicator);
-      container.appendChild(removeBtn);
-
-      // Attach event listeners so that changes update the beat indicator.
+      // BPM & Time Sig -> update beat indicator
       const bpmInput = inputsDiv.querySelector('.bpm-input');
       const timeSigInput = inputsDiv.querySelector('.timesig-input');
-      bpmInput.addEventListener('input', () => { updateBeatIndicator(index); });
-      timeSigInput.addEventListener('change', () => { updateBeatIndicator(index); });
+      bpmInput.addEventListener('input', () => updateBeatIndicator(index));
+      timeSigInput.addEventListener('change', () => updateBeatIndicator(index));
+
+      // Tap Tempo
+      tapTempoBtn.addEventListener('click', () => handleTapTempo(index));
 
       return container;
     }
 
     /**
-     * Sets up (or re‑sets) the beat indicator for the module with the given index.
-     * If a valid BPM is present, it generates the beat numbers and starts an interval timer.
+     * Tap Tempo: Time between last two taps => BPM
+     */
+    function handleTapTempo(index) {
+      const now = performance.now();
+      if (!tapData[index]) return;
+
+      const lastTap = tapData[index].lastTapTime;
+      if (lastTap > 0) {
+        const diff = now - lastTap; // ms between taps
+        const newBpm = Math.round(60000 / diff);
+        // Update BPM
+        const moduleEl = document.querySelector(`.song-module[data-index="${index}"]`);
+        if (!moduleEl) return;
+        const bpmInput = moduleEl.querySelector('.bpm-input');
+        bpmInput.value = newBpm;
+        // Refresh beat indicator
+        updateBeatIndicator(index);
+      }
+      tapData[index].lastTapTime = now;
+    }
+
+    /**
+     * Sets up (or resets) the beat indicator for the module with the given index.
      */
     function updateBeatIndicator(index) {
       const moduleEl = document.querySelector(`.song-module[data-index="${index}"]`);
@@ -240,7 +375,7 @@
       const timeSigInput = moduleEl.querySelector('.timesig-input');
       const beatIndicator = moduleEl.querySelector('.beat-indicator');
 
-      // Clear any existing interval for this module.
+      // Clear any existing interval
       if (beatData[index] && beatData[index].intervalId) {
         clearInterval(beatData[index].intervalId);
       }
@@ -251,35 +386,32 @@
         beatIndicator.innerHTML = '';
         return;
       }
-      const timeSig = timeSigInput.value;
-      const topNumber = parseInt(timeSig.split('/')[0], 10);
+      const topNumber = parseInt(timeSigInput.value.split('/')[0], 10);
 
-      // Generate beat numbers (e.g., "1 2 3 4").
+      // Generate beat numbers
       let beatHTML = '';
       for (let i = 1; i <= topNumber; i++) {
         beatHTML += `<span data-beat="${i}">${i}</span> `;
       }
       beatIndicator.innerHTML = beatHTML;
 
+      // Interval in ms
       const intervalMs = (60 / bpm) * 1000;
-      // Set an interval to highlight the current beat.
       beatData[index].intervalId = setInterval(() => {
         beatData[index].beatCount++;
         const currentBeat = ((beatData[index].beatCount - 1) % topNumber) + 1;
-        const beatSpan = beatIndicator.querySelector(`span[data-beat="${currentBeat}"]`);
-        if (beatSpan) {
-          beatSpan.classList.add('active');
-          setTimeout(() => { beatSpan.classList.remove('active'); }, 100);
+        const span = beatIndicator.querySelector(`span[data-beat="${currentBeat}"]`);
+        if (span) {
+          span.classList.add('active');
+          setTimeout(() => span.classList.remove('active'), 100);
         }
       }, intervalMs);
     }
 
     /**
-     * Builds a compressed URL containing current values from all song modules.
-     * Uses LZ-String to compress the data into a single "data" parameter.
+     * Build a compressed URL with all modules' data.
      */
     function buildUrlWithValues() {
-      // 1) Gather all modules data into an array
       const modules = document.querySelectorAll('.song-module');
       const allData = [];
       modules.forEach((module) => {
@@ -288,40 +420,27 @@
         const timeSigVal = module.querySelector('.timesig-input').value;
         allData.push({ song: songVal, bpm: bpmVal, timeSig: timeSigVal });
       });
-
-      // 2) Convert to JSON
       const jsonString = JSON.stringify(allData);
-
-      // 3) Compress and encode
       const compressed = LZString.compressToEncodedURIComponent(jsonString);
-
-      // 4) Build final URL with ?data= param
       return window.location.origin + window.location.pathname + '?data=' + compressed;
     }
 
     /**
-     * Loads song modules from a single compressed "data" parameter.
-     * If none exists, adds one default module.
+     * Load modules from the compressed "data" param, or create one default module.
      */
     function loadFromUrlParams() {
       const params = new URLSearchParams(window.location.search);
       const compressedData = params.get('data');
 
       if (!compressedData) {
-        // No data param found; just add one default module
         addSongModule();
         return;
       }
-
-      // Decompress
       const jsonString = LZString.decompressFromEncodedURIComponent(compressedData);
       if (!jsonString) {
-        // If decompression fails, fallback
         addSongModule();
         return;
       }
-
-      // Parse the JSON array
       let allData;
       try {
         allData = JSON.parse(jsonString);
@@ -329,8 +448,6 @@
         addSongModule();
         return;
       }
-
-      // allData is an array of {song, bpm, timeSig}
       if (Array.isArray(allData) && allData.length > 0) {
         allData.forEach((item) => addSongModule(item));
       } else {
@@ -339,21 +456,19 @@
     }
 
     /**
-     * Adds a new song module to the container and immediately starts its beat indicator.
+     * Add a new song module and immediately update its beat indicator.
      */
     function addSongModule(data = {}) {
       moduleCount++;
       const module = createSongModule(moduleCount, data);
       document.getElementById('songsContainer').appendChild(module);
-      // Now that the module is in the DOM, update its beat indicator.
       updateBeatIndicator(moduleCount);
     }
 
-    // Set up event listeners for the buttons.
+    // Event listeners for main buttons
     document.getElementById('addSongBtn').addEventListener('click', () => {
       addSongModule();
     });
-
     document.getElementById('copyUrlBtn').addEventListener('click', () => {
       const newUrl = buildUrlWithValues();
       navigator.clipboard.writeText(newUrl).then(() => {
@@ -363,10 +478,8 @@
       });
     });
 
-    // Load compressed data from URL on page load (or add one default module).
-    window.addEventListener('DOMContentLoaded', () => {
-      loadFromUrlParams();
-    });
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', loadFromUrlParams);
   </script>
 </body>
 </html>
