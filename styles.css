@@ -103,7 +103,49 @@
   input:checked + .slider:before {
     transform: translateX(22px);
   }
+  /* Container holding  title modules */
+  #titleContainer {
+    margin-bottom: 15px;
+  }
   
+  /* SONG MODULE LAYOUT (CSS Grid) */
+  .title-module {
+    margin-bottom: 15px;
+    text-align: center; /* Center the text */
+    font-size: 2em; /* Increase the text size to be similar to an h1 */
+  }
+  
+  /* title Title container: col1 row1 */
+  .title-title-container {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .title-display {
+    display: none;
+    cursor: pointer;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    font-weight: 500;
+  }
+  .title-input {
+    padding: 8px;
+    font-size: 1em;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    text-align: center; /* Center the text inside the input */
+  }
+  .title-input:focus {
+    border-color: var(--focus-border-color);
+  }
+
   /* Container holding all song modules */
   #songsContainer {
     margin-bottom: 15px;
@@ -211,7 +253,7 @@
   
   /* .beat-indicator => col1..5, row2 */
   .beat-indicator {
-    grid-column: 1 / 5;
+    grid-column: 1 / 6;
     grid-row: 2;
     text-align: center;
     transition: color 0.3s;
@@ -230,7 +272,7 @@
   /* remove-song-btn => col5, row2 (bottom right) */
   .remove-song-btn {
     grid-column: 5;
-    grid-row: 2;
+    grid-row: 1;
     justify-self: end;
     background: none;
     border: none;
@@ -271,6 +313,15 @@
        Row 4: [ (empty col1) remove col2 (bottom right) ]
   */
   @media (max-width: 480px) {
+    .title-module {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto auto auto;
+    }
+    /* title => row1 col1 */
+    .title-title-container {
+      grid-column: 1;
+      grid-row: 1;
+    }
     .song-module {
       grid-template-columns: 1fr 1fr;
       grid-template-rows: auto auto auto auto;

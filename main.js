@@ -30,6 +30,74 @@ function refreshPage() {
   window.location.href = baseUrl; // full reload
 }
 
+/* ========== CREATE TITLE MODULE ========== */
+function createTitleModule(data) {
+  const titleDiv = document.createElement('div');
+  titleDiv.className = 'title-module';
+  titleDiv.textContent = data.title || 'Setlist Name';
+
+  // title Title container
+  const titleTitleContainer = document.createElement('div');
+  titleTitleContainer.className = 'title-title-container';
+
+  // Display text
+  const titleDisplay = document.createElement('span');
+  titleDisplay.className = 'title-display';
+  titleDisplay.title = "Click to edit title";
+
+  // Input for editing the title
+  const titleInput = document.createElement('input');
+  titleInput.className = 'title-input song-input'; // Add song-input class to match the song-input style
+  titleInput.type = 'text';
+  titleInput.placeholder = 'Add Setlist Title';
+  titleInput.value = data.title || '';
+
+  // Sync display text
+  function updateTitleDisplay() {
+    const val = titleInput.value.trim();
+    if (val) {
+      titleDisplay.innerHTML = '<ion-icon name="create-outline" class="edit-icon"></ion-icon> ' + val;
+    } else {
+      titleDisplay.innerHTML = '';
+    }
+  }
+
+  // On blur, if there's a value, show the display
+  titleInput.addEventListener('blur', () => {
+    updateTitleDisplay();
+    const val = titleInput.value.trim();
+    if (val) {
+      titleInput.style.display = 'none';
+      titleDisplay.style.display = 'block';
+    } else {
+      titleInput.style.display = 'block';
+      titleDisplay.style.display = 'none';
+    }
+  });
+
+  // Clicking anywhere in title-module => revert to input
+  titleDiv.addEventListener('click', () => {
+    titleDisplay.style.display = 'none';
+    titleInput.style.display = 'block';
+    titleInput.focus();
+  });
+
+  // Initialize display
+  updateTitleDisplay();
+  if (titleInput.value.trim()) {
+    titleInput.style.display = 'none';
+    titleDisplay.style.display = 'block';
+  } else {
+    titleInput.style.display = 'block';
+    titleDisplay.style.display = 'none';
+  }
+
+  titleTitleContainer.appendChild(titleDisplay);
+  titleTitleContainer.appendChild(titleInput);
+  titleDiv.appendChild(titleTitleContainer); // Append titleTitleContainer to titleDiv
+  document.getElementById('titleContainer').appendChild(titleDiv); // Append titleDiv to the titleContainer
+}
+
 /* ========== CREATE SONG MODULE ========== */
 function createSongModule(index, data = {}) {
   const container = document.createElement('div');
@@ -232,13 +300,18 @@ function updateBeatIndicator(index) {
 
 /* Build compressed URL */
 function buildUrlWithValues() {
-  const modules = document.querySelectorAll('.song-module');
+  const modules = document.querySelectorAll('.song-module, .title-module');
   const allData = [];
   modules.forEach((module) => {
-    const songVal = module.querySelector('.song-input').value;
-    const bpmVal = module.querySelector('.bpm-select').value;
-    const timeSigVal = module.querySelector('.timesig-select').value;
-    allData.push({ song: songVal, bpm: bpmVal, timeSig: timeSigVal });
+    if (module.classList.contains('song-module')) {
+      const songVal = module.querySelector('.song-input').value;
+      const bpmVal = module.querySelector('.bpm-select').value;
+      const timeSigVal = module.querySelector('.timesig-select').value;
+      allData.push({ type: 'song', song: songVal, bpm: bpmVal, timeSig: timeSigVal });
+    } else if (module.classList.contains('title-module')) {
+      const titleVal = module.querySelector('.title-input').value;
+      allData.push({ type: 'title', title: titleVal });
+    }
   });
   const jsonString = JSON.stringify(allData);
   const compressed = LZString.compressToEncodedURIComponent(jsonString);
@@ -276,9 +349,79 @@ function loadFromUrlParams() {
 /* Add a new module & update its indicator */
 function addSongModule(data = {}) {
   moduleCount++;
-  const module = createSongModule(moduleCount, data);
-  document.getElementById('songsContainer').appendChild(module);
+  const songModule = createSongModule(moduleCount, data);
+  document.getElementById('songsContainer').appendChild(songModule);
   updateBeatIndicator(moduleCount);
+}
+
+/* Add title module */
+function addTitleModule(data) {
+  console.log('addTitleModule called with data:', data);
+  const titleContainer = document.getElementById('titleContainer');
+  if (titleContainer) {
+    const titleElement = document.createElement('div');
+    titleElement.className = 'title-module';
+
+    // Display text
+    const titleDisplay = document.createElement('span');
+    titleDisplay.className = 'title-display';
+    titleDisplay.title = "Click to edit title";
+    titleDisplay.innerHTML = data && data.title ? '<ion-icon name="create-outline" class="edit-icon"></ion-icon> ' + data.title : 'Setlist Name';
+
+    // Input for editing the title
+    const titleInput = document.createElement('input');
+    titleInput.className = 'title-input song-input'; // Add song-input class to match the song-input style
+    titleInput.type = 'text';
+    titleInput.placeholder = 'Add Setlist Title';
+    titleInput.value = data && data.title ? data.title : '';
+
+    // Sync display text
+    function updateTitleDisplay() {
+      const val = titleInput.value.trim();
+      if (val) {
+        titleDisplay.innerHTML = '<ion-icon name="create-outline" class="edit-icon"></ion-icon> ' + val;
+      } else {
+        titleDisplay.innerHTML = '';
+      }
+    }
+
+    // On blur, if there's a value, show the display
+    titleInput.addEventListener('blur', () => {
+      updateTitleDisplay();
+      const val = titleInput.value.trim();
+      if (val) {
+        titleInput.style.display = 'none';
+        titleDisplay.style.display = 'block';
+      } else {
+        titleInput.style.display = 'block';
+        titleDisplay.style.display = 'none';
+      }
+    });
+
+    // Clicking anywhere in title-module => revert to input
+    titleElement.addEventListener('click', () => {
+      titleDisplay.style.display = 'none';
+      titleInput.style.display = 'block';
+      titleInput.focus();
+    });
+
+    // Initialize display
+    updateTitleDisplay();
+    if (titleInput.value.trim()) {
+      titleInput.style.display = 'none';
+      titleDisplay.style.display = 'block';
+    } else {
+      titleInput.style.display = 'block';
+      titleDisplay.style.display = 'none';
+    }
+
+    titleElement.appendChild(titleDisplay);
+    titleElement.appendChild(titleInput);
+    titleContainer.appendChild(titleElement);
+    console.log('Title module added:', titleElement);
+  } else {
+    console.error('Title container not found');
+  }
 }
 
 /* Refresh: clear ?data= and reload */
@@ -299,6 +442,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2) Load modules from URL
   loadFromUrlParams();
+
+  // Add a title module
+  addTitleModule();
 
   // 3) Setup top bar
   document.getElementById('refreshBtn').addEventListener('click', refreshPage);
