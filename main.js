@@ -307,14 +307,23 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('addSongBtn').addEventListener('click', () => {
     addSongModule();
   });
-  document.getElementById('copyUrlBtn').addEventListener('click', () => {
-    const newUrl = buildUrlWithValues();
-    navigator.clipboard.writeText(newUrl).then(() => {
-      alert('URL copied to clipboard:\n' + newUrl);
-      // Also update browser nav so it matches
-      window.history.replaceState({}, '', newUrl);
-    }).catch(err => {
-      alert('Error copying URL: ' + err);
-    });
-  });
+  document.getElementById('shareBtn').addEventListener('click', () => {
+    const newUrl = buildUrlWithValues(); // your existing function
+  
+    // If the Web Share API is supported, open the native share sheet:
+    if (navigator.share) {
+      navigator.share({
+        title: 'Tempo Notes',
+        text: 'Check out my current tempo set!',
+        url: newUrl
+      }).catch(err => {
+        console.log('Sharing canceled or failed', err);
+      });
+    } else {
+      // Fallback if Web Share API not supported (e.g., copy to clipboard)
+      navigator.clipboard.writeText(newUrl)
+        .then(() => alert(`URL copied to clipboard:\n${newUrl}`))
+        .catch(err => alert('Error copying URL: ' + err));
+    }
+  });  
 });

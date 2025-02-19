@@ -51,8 +51,15 @@
 
   <!-- Bottom bar: + Add Song and Copy URL -->
   <div id="bottomBar">
-    <button id="addSongBtn">+ Add Song</button>
-    <button id="copyUrlBtn">Copy URL</button>
+    <!-- Instead of <button id="addSongBtn">+ Add Song</button>, do: -->
+    <button id="addSongBtn" title="Add Song">
+      <ion-icon name="add-outline"></ion-icon>
+    </button>
+    <!-- Instead of <button id="copyUrlBtn">Copy URL</button> -->
+    <button id="shareBtn">
+      <ion-icon name="share-outline"></ion-icon>
+    </button>
+
   </div>
 
   <!-- External JS -->
