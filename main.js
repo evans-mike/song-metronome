@@ -324,25 +324,43 @@ function loadFromUrlParams() {
   const compressedData = params.get('data');
 
   if (!compressedData) {
-    addSongModule();
+    addTitleModule(); // Add title module if no data is found
+    addSongModule();  // Add a default song module
     return;
   }
+
   const jsonString = LZString.decompressFromEncodedURIComponent(compressedData);
   if (!jsonString) {
-    addSongModule();
+    addTitleModule(); // Add title module if decompression fails
+    addSongModule();  // Add a default song module
     return;
   }
+
   let allData;
   try {
     allData = JSON.parse(jsonString);
   } catch (e) {
-    addSongModule();
+    addTitleModule(); // Add title module if JSON parsing fails
+    addSongModule();  // Add a default song module
     return;
   }
+
+  let titleAdded = false;
   if (Array.isArray(allData) && allData.length > 0) {
-    allData.forEach((item) => addSongModule(item));
-  } else {
-    addSongModule();
+    allData.forEach((item) => {
+      if (item.type === 'title') {
+        if (!titleAdded) {
+          addTitleModule(item); // Add title module only once
+          titleAdded = true;
+        }
+      } else {
+        addSongModule(item);
+      }
+    });
+  }
+
+  if (!titleAdded) {
+    addTitleModule(); // Ensure title module is added if not present in data
   }
 }
 
@@ -372,8 +390,8 @@ function addTitleModule(data) {
     const titleInput = document.createElement('input');
     titleInput.className = 'title-input song-input'; // Add song-input class to match the song-input style
     titleInput.type = 'text';
-    titleInput.placeholder = 'Add Setlist Title';
-    titleInput.value = data && data.title ? data.title : '';
+    titleInput.placeholder = 'Tempo Notes';
+    titleInput.value = data && data.title ? data.title : titleInput.placeholder;
 
     // Sync display text
     function updateTitleDisplay() {
@@ -443,9 +461,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2) Load modules from URL
   loadFromUrlParams();
 
-  // Add a title module
-  addTitleModule();
-
   // 3) Setup top bar
   document.getElementById('refreshBtn').addEventListener('click', refreshPage);
 
@@ -459,7 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // If the Web Share API is supported, open the native share sheet:
     if (navigator.share) {
       navigator.share({
-        title: 'Tempo Notes',
+        title: 'Tempo Notes', 
         text: 'Check out my current tempo set!',
         url: newUrl
       }).catch(err => {
