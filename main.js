@@ -103,8 +103,9 @@ function createSongModule(index, data = {}) {
   const container = document.createElement('div');
   container.className = 'song-module';
   container.dataset.index = index;
+  container.draggable = true; // Keep draggable functionality
 
-  // Song Title container
+  // Song Title container (now first element)
   const songTitleContainer = document.createElement('div');
   songTitleContainer.className = 'song-title-container';
 
@@ -205,13 +206,19 @@ function createSongModule(index, data = {}) {
   removeBtn.title = "Remove this song";
   removeBtn.innerHTML = '<ion-icon name="trash-outline"></ion-icon>';
 
-  // Append in grid order
-  container.appendChild(songTitleContainer); // col1
-  container.appendChild(bpmSelect);          // col2
-  container.appendChild(tapTempoBtn);        // col3
-  container.appendChild(timesigSelect);      // col4
-  container.appendChild(beatIndicator);      // row2
-  container.appendChild(removeBtn);          // row2 col5
+  // Append in grid order - removed moveHandle
+  container.appendChild(songTitleContainer);   // col1 (now first)
+  container.appendChild(bpmSelect);           // col2
+  container.appendChild(tapTempoBtn);         // col3
+  container.appendChild(timesigSelect);       // col4
+  container.appendChild(beatIndicator);       // row2
+  container.appendChild(removeBtn);           // row2 col5
+
+  // Keep drag and drop event listeners
+  container.addEventListener('dragstart', handleDragStart);
+  container.addEventListener('dragover', handleDragOver);
+  container.addEventListener('drop', handleDrop);
+  container.addEventListener('dragend', handleDragEnd);
 
   // Tap data
   tapData[index] = { lastTapTime: 0 };
@@ -236,6 +243,49 @@ function createSongModule(index, data = {}) {
   tapTempoBtn.addEventListener('click', () => handleTapTempo(index));
 
   return container;
+}
+
+let draggedElement = null;
+
+function handleDragStart(e) {
+  draggedElement = this;
+  this.style.opacity = '0.4';
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/html', this.innerHTML);
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const target = e.currentTarget;
+  if (target !== draggedElement) {
+    // Get the bounding rectangle of target
+    const targetRect = target.getBoundingClientRect();
+    const draggedRect = draggedElement.getBoundingClientRect();
+    
+    if (e.clientY < targetRect.top + (targetRect.height / 2)) {
+      target.parentNode.insertBefore(draggedElement, target);
+    } else {
+      target.parentNode.insertBefore(draggedElement, target.nextSibling);
+    }
+  }
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  return false;
+}
+
+function handleDragEnd(e) {
+  this.style.opacity = '1';
+  
+  // Update the song modules' indices
+  const songModules = document.querySelectorAll('.song-module');
+  songModules.forEach((module, index) => {
+    module.dataset.index = index + 1;
+    updateBeatIndicator(index + 1);
+  });
 }
 
 /* Tap Tempo: time between last two taps => BPM */
@@ -390,8 +440,8 @@ function addTitleModule(data) {
     const titleInput = document.createElement('input');
     titleInput.className = 'title-input song-input'; // Add song-input class to match the song-input style
     titleInput.type = 'text';
-    titleInput.placeholder = 'Tempo Notes';
-    titleInput.value = data && data.title ? data.title : titleInput.placeholder;
+    titleInput.placeholder = 'Add Setlist Title';
+    titleInput.value = data && data.title ? data.title : '';
 
     // Sync display text
     function updateTitleDisplay() {
