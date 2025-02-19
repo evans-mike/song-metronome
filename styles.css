@@ -360,7 +360,7 @@ input:checked + .slider:before {
   /* Remove => row4 col2, bottom right */
   .remove-song-btn {
     grid-column: 2;
-    grid-row: 4;
+    grid-row: 3;
     justify-self: end;
   }
 
