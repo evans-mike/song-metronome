@@ -1,6 +1,13 @@
+// ========== Global Variables ==========
 let moduleCount = 0;
 const beatData = {}; // For intervals, beat counts
 const tapData = {};  // For tap tempo
+
+// Touch handling variables
+let touchStartY = 0;
+let touchStartTime = 0;
+let touchedElement = null;
+let draggedElement = null;
 
 /* ========== DARK MODE TOGGLE ========== */
 function setDarkMode(isDark) {
@@ -10,92 +17,18 @@ function setDarkMode(isDark) {
     document.body.classList.remove('dark-mode');
   }
   localStorage.setItem('darkMode', isDark ? 'true' : 'false');
-  // Update the checkbox state
   document.getElementById('darkModeToggle').checked = isDark;
 }
 
 function loadDarkModePreference() {
   const saved = localStorage.getItem('darkMode');
-  if (saved === 'true') {
-    setDarkMode(true);
-  } else {
-    setDarkMode(false);
-  }
+  setDarkMode(saved === 'true');
 }
 
 /* ========== REFRESH BUTTON ========== */
 function refreshPage() {
-  // Clear ?data= by reloading the page without query params
   const baseUrl = window.location.origin + window.location.pathname;
   window.location.href = baseUrl; // full reload
-}
-
-/* ========== CREATE TITLE MODULE ========== */
-function createTitleModule(data) {
-  const titleDiv = document.createElement('div');
-  titleDiv.className = 'title-module';
-  titleDiv.textContent = data.title || 'Setlist Name';
-
-  // title Title container
-  const titleTitleContainer = document.createElement('div');
-  titleTitleContainer.className = 'title-title-container';
-
-  // Display text
-  const titleDisplay = document.createElement('span');
-  titleDisplay.className = 'title-display';
-  titleDisplay.title = "Click to edit title";
-
-  // Input for editing the title
-  const titleInput = document.createElement('input');
-  titleInput.className = 'title-input song-input'; // Add song-input class to match the song-input style
-  titleInput.type = 'text';
-  titleInput.placeholder = 'Add Setlist Title';
-  titleInput.value = data.title || '';
-
-  // Sync display text
-  function updateTitleDisplay() {
-    const val = titleInput.value.trim();
-    if (val) {
-      titleDisplay.innerHTML = '<ion-icon name="create-outline" class="edit-icon"></ion-icon> ' + val;
-    } else {
-      titleDisplay.innerHTML = '';
-    }
-  }
-
-  // On blur, if there's a value, show the display
-  titleInput.addEventListener('blur', () => {
-    updateTitleDisplay();
-    const val = titleInput.value.trim();
-    if (val) {
-      titleInput.style.display = 'none';
-      titleDisplay.style.display = 'block';
-    } else {
-      titleInput.style.display = 'block';
-      titleDisplay.style.display = 'none';
-    }
-  });
-
-  // Clicking anywhere in title-module => revert to input
-  titleDiv.addEventListener('click', () => {
-    titleDisplay.style.display = 'none';
-    titleInput.style.display = 'block';
-    titleInput.focus();
-  });
-
-  // Initialize display
-  updateTitleDisplay();
-  if (titleInput.value.trim()) {
-    titleInput.style.display = 'none';
-    titleDisplay.style.display = 'block';
-  } else {
-    titleInput.style.display = 'block';
-    titleDisplay.style.display = 'none';
-  }
-
-  titleTitleContainer.appendChild(titleDisplay);
-  titleTitleContainer.appendChild(titleInput);
-  titleDiv.appendChild(titleTitleContainer); // Append titleTitleContainer to titleDiv
-  document.getElementById('titleContainer').appendChild(titleDiv); // Append titleDiv to the titleContainer
 }
 
 /* ========== CREATE SONG MODULE ========== */
@@ -105,152 +38,30 @@ function createSongModule(index, data = {}) {
   container.dataset.index = index;
   container.draggable = true;
 
-  // Prevent dragging when interacting with controls
-  const preventDrag = (e) => {
-    const target = e.target;
-    if (
-      target.tagName === 'INPUT' || 
-      target.tagName === 'SELECT' || 
-      target.tagName === 'BUTTON' ||
-      target.closest('.beat-indicator')
-    ) {
-      container.draggable = false;
-      // Re-enable dragging after the interaction
-      setTimeout(() => {
-        container.draggable = true;
-      }, 100);
-    }
-  };
+  // Touch event handlers
+  container.addEventListener('touchstart', handleTouchStart, { passive: false });
+  container.addEventListener('touchmove', handleTouchMove, { passive: false });
+  container.addEventListener('touchend', handleTouchEnd);
 
-  // Add mousedown listener to handle draggable state
-  container.addEventListener('mousedown', preventDrag);
-  container.addEventListener('touchstart', preventDrag);
-
-  // Song Title container
-  const songTitleContainer = document.createElement('div');
-  songTitleContainer.className = 'song-title-container';
-
-  // Display text
-  const songDisplay = document.createElement('span');
-  songDisplay.className = 'song-display';
-  songDisplay.title = "Click to edit title";
-
-  // Input for editing the title
-  const songInput = document.createElement('input');
-  songInput.className = 'song-input';
-  songInput.type = 'text';
-  songInput.placeholder = 'Add Song Title';
-  songInput.value = data.song || '';
-
-  // Sync display text
-  function updateSongDisplay() {
-    const val = songInput.value.trim();
-    if (val) {
-      songDisplay.innerHTML = '<ion-icon name="create-outline" class="edit-icon"></ion-icon> ' + val;
-    } else {
-      songDisplay.innerHTML = '';
-    }
-  }
-
-  // On blur, if there's a value, show the display
-  songInput.addEventListener('blur', () => {
-    updateSongDisplay();
-    const val = songInput.value.trim();
-    if (val) {
-      songInput.style.display = 'none';
-      songDisplay.style.display = 'block';
-    } else {
-      songInput.style.display = 'block';
-      songDisplay.style.display = 'none';
-    }
-  });
-
-  // Clicking display => revert to input
-  songDisplay.addEventListener('click', () => {
-    songDisplay.style.display = 'none';
-    songInput.style.display = 'block';
-    songInput.focus();
-  });
-
-  // Initialize display
-  updateSongDisplay();
-  if (songInput.value.trim()) {
-    songInput.style.display = 'none';
-    songDisplay.style.display = 'block';
-  }
-
-  songTitleContainer.appendChild(songDisplay);
-  songTitleContainer.appendChild(songInput);
-
-  // BPM <select> (30..300, default 68 if no data)
-  const bpmSelect = document.createElement('select');
-  bpmSelect.className = 'bpm-select';
-  for (let i = 30; i <= 300; i++) {
-    const opt = document.createElement('option');
-    opt.value = i;
-    opt.textContent = i;
-    if (data.bpm ? (i === +data.bpm) : (i === 68)) {
-      opt.selected = true;
-    }
-    bpmSelect.appendChild(opt);
-  }
-
-  // Tap Tempo button
-  const tapTempoBtn = document.createElement('button');
-  tapTempoBtn.className = 'tap-tempo-btn';
-  tapTempoBtn.type = 'button';
-  tapTempoBtn.textContent = 'Tap';
-
-  // TimeSig <select>
-  const timesigSelect = document.createElement('select');
-  timesigSelect.className = 'timesig-select';
-  const timesigOptions = ['2/2','3/4','4/4','6/8','9/8','12/8'];
-  timesigOptions.forEach(ts => {
-    const opt = document.createElement('option');
-    opt.value = ts;
-    opt.textContent = ts;
-    if (data.timeSig) {
-      if (ts === data.timeSig) opt.selected = true;
-    } else {
-      if (ts === '4/4') opt.selected = true;
-    }
-    timesigSelect.appendChild(opt);
-  });
-
-  // Beat indicator
-  const beatIndicator = document.createElement('div');
-  beatIndicator.className = 'beat-indicator';
-
-  // Remove button
-  const removeBtn = document.createElement('button');
-  removeBtn.className = 'remove-song-btn';
-  removeBtn.title = "Remove this song";
-  removeBtn.innerHTML = '<ion-icon name="trash-outline"></ion-icon>';
-
-  // Add mousedown listener to handle draggable state
-  container.addEventListener('mousedown', preventDrag);
-  container.addEventListener('touchstart', preventDrag);
-
-  // Handle drag events
-  container.addEventListener('dragstart', (e) => {
-    draggedElement = container;
-    container.style.opacity = '0.4';
-    e.dataTransfer.effectAllowed = 'move';
-  });
-
+  // Desktop drag event handlers
+  container.addEventListener('dragstart', handleDragStart);
   container.addEventListener('dragover', handleDragOver);
   container.addEventListener('drop', handleDrop);
+  container.addEventListener('dragend', handleDragEnd);
+
+  // Prevent dragging when interacting with controls
+  container.addEventListener('mousedown', preventDragOnControls);
+  container.addEventListener('touchstart', preventDragOnControls);
+
+  // Create song title container
+  const songTitleContainer = createSongTitleContainer(data);
   
-  container.addEventListener('dragend', (e) => {
-    container.style.opacity = '1';
-    
-    // Update the song modules' indices
-    const songModules = document.querySelectorAll('.song-module');
-    songModules.forEach((module, index) => {
-      module.dataset.index = index + 1;
-      updateBeatIndicator(index + 1);
-    });
-  });
+  // Create controls
+  const bpmSelect = createBPMSelect(data);
+  const tapTempoBtn = createTapTempoButton();
+  const timesigSelect = createTimeSignatureSelect(data);
+  const beatIndicator = createBeatIndicator();
+  const removeBtn = createRemoveButton(index, container);
 
   // Append all elements
   container.appendChild(songTitleContainer);
@@ -260,33 +71,64 @@ function createSongModule(index, data = {}) {
   container.appendChild(beatIndicator);
   container.appendChild(removeBtn);
 
-
-  // Tap data
-  tapData[index] = { lastTapTime: 0 };
-
-  // Remove logic with confirmation
-  removeBtn.addEventListener('click', () => {
-    if (confirm("Are you sure you want to remove this song?")) {
-      if (beatData[index] && beatData[index].intervalId) {
-        clearInterval(beatData[index].intervalId);
-        delete beatData[index];
-      }
-      delete tapData[index];
-      container.remove();
-    }
-  });
-
-  // BPM & TimeSig -> update beat indicator
+  // Setup event listeners for BPM and TimeSignature changes
   bpmSelect.addEventListener('change', () => updateBeatIndicator(index));
   timesigSelect.addEventListener('change', () => updateBeatIndicator(index));
-
-  // Tap Tempo
   tapTempoBtn.addEventListener('click', () => handleTapTempo(index));
 
   return container;
 }
 
-let draggedElement = null;
+// ========== Touch Event Handlers ==========
+function handleTouchStart(e) {
+  const target = e.target;
+  if (shouldPreventDrag(target)) return;
+
+  touchStartY = e.touches[0].clientY;
+  touchStartTime = Date.now();
+  touchedElement = this;
+  this.classList.add('dragging');
+}
+
+function handleTouchMove(e) {
+  if (!touchedElement || touchedElement !== this) return;
+  
+  e.preventDefault();
+  const touch = e.touches[0];
+  const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
+  
+  const targetElement = elements.find(el => 
+    el.classList.contains('song-module') && el !== touchedElement
+  );
+
+  if (targetElement) {
+    const targetRect = targetElement.getBoundingClientRect();
+    if (touch.clientY < targetRect.top + (targetRect.height / 2)) {
+      targetElement.parentNode.insertBefore(touchedElement, targetElement);
+    } else {
+      targetElement.parentNode.insertBefore(touchedElement, targetElement.nextSibling);
+    }
+  }
+}
+
+function handleTouchEnd() {
+  if (!touchedElement || touchedElement !== this) return;
+  
+  const touchDuration = Date.now() - touchStartTime;
+  if (touchDuration >= 200) {
+    updateModuleIndices();
+  }
+  
+  this.classList.remove('dragging');
+  touchedElement = null;
+}
+
+// ========== Desktop Drag Event Handlers ==========
+function handleDragStart(e) {
+  draggedElement = this;
+  this.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
 
 function handleDragOver(e) {
   e.preventDefault();
@@ -303,17 +145,35 @@ function handleDragOver(e) {
   }
 }
 
-// Update handleDrop function
 function handleDrop(e) {
   e.preventDefault();
   e.stopPropagation();
   return false;
 }
 
-function handleDragEnd(e) {
-  this.style.opacity = '1';
-  
-  // Update the song modules' indices
+function handleDragEnd() {
+  this.classList.remove('dragging');
+  updateModuleIndices();
+  draggedElement = null;
+}
+
+// ========== Helper Functions ==========
+function preventDragOnControls(e) {
+  if (shouldPreventDrag(e.target)) {
+    this.draggable = false;
+    setTimeout(() => {
+      this.draggable = true;
+    }, 100);
+  }
+}
+
+function shouldPreventDrag(target) {
+  return target.tagName === 'INPUT' || 
+         target.tagName === 'SELECT' || 
+         target.tagName === 'BUTTON';
+}
+
+function updateModuleIndices() {
   const songModules = document.querySelectorAll('.song-module');
   songModules.forEach((module, index) => {
     module.dataset.index = index + 1;
@@ -321,7 +181,110 @@ function handleDragEnd(e) {
   });
 }
 
-/* Tap Tempo: time between last two taps => BPM */
+function createSongTitleContainer(data) {
+  const container = document.createElement('div');
+  container.className = 'song-title-container';
+
+  const display = document.createElement('span');
+  display.className = 'song-display';
+  display.title = "Click to edit title";
+
+  const input = document.createElement('input');
+  input.className = 'song-input';
+  input.type = 'text';
+  input.placeholder = 'Add Song Title';
+  input.value = data.song || '';
+
+  function updateDisplay() {
+    const val = input.value.trim();
+    if (val) {
+      display.innerHTML = '<ion-icon name="create-outline" class="edit-icon"></ion-icon> ' + val;
+      input.style.display = 'none';
+      display.style.display = 'block';
+    } else {
+      display.innerHTML = '';
+      input.style.display = 'block';
+      display.style.display = 'none';
+    }
+  }
+
+  input.addEventListener('blur', updateDisplay);
+  display.addEventListener('click', () => {
+    display.style.display = 'none';
+    input.style.display = 'block';
+    input.focus();
+  });
+
+  updateDisplay();
+  container.appendChild(display);
+  container.appendChild(input);
+  return container;
+}
+
+function createBPMSelect(data) {
+  const select = document.createElement('select');
+  select.className = 'bpm-select';
+  for (let i = 30; i <= 300; i++) {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = i;
+    if (data.bpm ? (i === +data.bpm) : (i === 68)) {
+      opt.selected = true;
+    }
+    select.appendChild(opt);
+  }
+  return select;
+}
+
+function createTapTempoButton() {
+  const btn = document.createElement('button');
+  btn.className = 'tap-tempo-btn';
+  btn.type = 'button';
+  btn.textContent = 'Tap';
+  return btn;
+}
+
+function createTimeSignatureSelect(data) {
+  const select = document.createElement('select');
+  select.className = 'timesig-select';
+  const options = ['2/2','3/4','4/4','6/8','9/8','12/8'];
+  options.forEach(ts => {
+    const opt = document.createElement('option');
+    opt.value = ts;
+    opt.textContent = ts;
+    opt.selected = data.timeSig ? (ts === data.timeSig) : (ts === '4/4');
+    select.appendChild(opt);
+  });
+  return select;
+}
+
+function createBeatIndicator() {
+  const indicator = document.createElement('div');
+  indicator.className = 'beat-indicator';
+  return indicator;
+}
+
+function createRemoveButton(index, container) {
+  const btn = document.createElement('button');
+  btn.className = 'remove-song-btn';
+  btn.title = "Remove this song";
+  btn.innerHTML = '<ion-icon name="trash-outline"></ion-icon>';
+  
+  btn.addEventListener('click', () => {
+    if (confirm("Are you sure you want to remove this song?")) {
+      if (beatData[index]?.intervalId) {
+        clearInterval(beatData[index].intervalId);
+        delete beatData[index];
+      }
+      delete tapData[index];
+      container.remove();
+    }
+  });
+  
+  return btn;
+}
+
+/* ========== TAP TEMPO ========== */
 function handleTapTempo(index) {
   const now = performance.now();
   if (!tapData[index]) return;
@@ -330,12 +293,11 @@ function handleTapTempo(index) {
   if (lastTap > 0) {
     const diff = now - lastTap;
     const newBpm = Math.round(60000 / diff);
-
+    
     const moduleEl = document.querySelector(`.song-module[data-index="${index}"]`);
     if (!moduleEl) return;
+    
     const bpmSelect = moduleEl.querySelector('.bpm-select');
-
-    // clamp BPM to 30..300
     const clampedBpm = Math.max(30, Math.min(newBpm, 300));
     bpmSelect.value = clampedBpm;
     updateBeatIndicator(index);
@@ -343,15 +305,16 @@ function handleTapTempo(index) {
   tapData[index].lastTapTime = now;
 }
 
-/* Set up or reset the beat indicator */
+/* ========== BEAT INDICATOR ========== */
 function updateBeatIndicator(index) {
   const moduleEl = document.querySelector(`.song-module[data-index="${index}"]`);
   if (!moduleEl) return;
+
   const bpmSelect = moduleEl.querySelector('.bpm-select');
   const timesigSelect = moduleEl.querySelector('.timesig-select');
   const beatIndicator = moduleEl.querySelector('.beat-indicator');
 
-  if (beatData[index] && beatData[index].intervalId) {
+  if (beatData[index]?.intervalId) {
     clearInterval(beatData[index].intervalId);
   }
   beatData[index] = { intervalId: null, beatCount: 0 };
@@ -361,13 +324,11 @@ function updateBeatIndicator(index) {
     beatIndicator.innerHTML = '';
     return;
   }
-  const topNumber = parseInt(timesigSelect.value.split('/')[0], 10);
 
-  let beatHTML = '';
-  for (let i = 1; i <= topNumber; i++) {
-    beatHTML += `<span data-beat="${i}">${i}</span> `;
-  }
-  beatIndicator.innerHTML = beatHTML;
+  const topNumber = parseInt(timesigSelect.value.split('/')[0], 10);
+  beatIndicator.innerHTML = Array.from({length: topNumber}, (_, i) => 
+    `<span data-beat="${i + 1}">${i + 1}</span> `
+  ).join('');
 
   const intervalMs = (60 / bpm) * 1000;
   beatData[index].intervalId = setInterval(() => {
@@ -381,161 +342,123 @@ function updateBeatIndicator(index) {
   }, intervalMs);
 }
 
-/* Build compressed URL */
+/* ========== URL HANDLING ========== */
 function buildUrlWithValues() {
   const modules = document.querySelectorAll('.song-module, .title-module');
-  const allData = [];
-  modules.forEach((module) => {
+  const allData = Array.from(modules).map(module => {
     if (module.classList.contains('song-module')) {
-      const songVal = module.querySelector('.song-input').value;
-      const bpmVal = module.querySelector('.bpm-select').value;
-      const timeSigVal = module.querySelector('.timesig-select').value;
-      allData.push({ type: 'song', song: songVal, bpm: bpmVal, timeSig: timeSigVal });
-    } else if (module.classList.contains('title-module')) {
-      const titleVal = module.querySelector('.title-input').value;
-      allData.push({ type: 'title', title: titleVal });
+      return {
+        type: 'song',
+        song: module.querySelector('.song-input').value,
+        bpm: module.querySelector('.bpm-select').value,
+        timeSig: module.querySelector('.timesig-select').value
+      };
+    } else {
+      return {
+        type: 'title',
+        title: module.querySelector('.title-input').value
+      };
     }
   });
+
   const jsonString = JSON.stringify(allData);
   const compressed = LZString.compressToEncodedURIComponent(jsonString);
   return window.location.origin + window.location.pathname + '?data=' + compressed;
 }
 
-/* Load from URL or create a default module */
 function loadFromUrlParams() {
   const params = new URLSearchParams(window.location.search);
   const compressedData = params.get('data');
 
   if (!compressedData) {
-    addTitleModule(); // Add title module if no data is found
-    addSongModule();  // Add a default song module
+    addTitleModule();
+    addSongModule();
     return;
   }
 
-  const jsonString = LZString.decompressFromEncodedURIComponent(compressedData);
-  if (!jsonString) {
-    addTitleModule(); // Add title module if decompression fails
-    addSongModule();  // Add a default song module
-    return;
-  }
-
-  let allData;
   try {
-    allData = JSON.parse(jsonString);
-  } catch (e) {
-    addTitleModule(); // Add title module if JSON parsing fails
-    addSongModule();  // Add a default song module
-    return;
-  }
+    const jsonString = LZString.decompressFromEncodedURIComponent(compressedData);
+    if (!jsonString) throw new Error('Invalid compressed data');
+    
+    const allData = JSON.parse(jsonString);
+    if (!Array.isArray(allData)) throw new Error('Invalid data format');
 
-  let titleAdded = false;
-  if (Array.isArray(allData) && allData.length > 0) {
-    allData.forEach((item) => {
-      if (item.type === 'title') {
-        if (!titleAdded) {
-          addTitleModule(item); // Add title module only once
-          titleAdded = true;
-        }
-      } else {
+    let titleAdded = false;
+    allData.forEach(item => {
+      if (item.type === 'title' && !titleAdded) {
+        addTitleModule(item);
+        titleAdded = true;
+      } else if (item.type === 'song') {
         addSongModule(item);
       }
     });
-  }
 
-  if (!titleAdded) {
-    addTitleModule(); // Ensure title module is added if not present in data
+    if (!titleAdded) addTitleModule();
+  } catch (e) {
+    console.error('Error loading data:', e);
+    addTitleModule();
+    addSongModule();
   }
 }
 
-/* Add a new module & update its indicator */
+/* ========== ADD MODULES ========== */
 function addSongModule(data = {}) {
   moduleCount++;
   const songModule = createSongModule(moduleCount, data);
   document.getElementById('songsContainer').appendChild(songModule);
   updateBeatIndicator(moduleCount);
+  
+  // Initialize tap data
+  tapData[moduleCount] = { lastTapTime: 0 };
 }
 
-/* Add title module */
 function addTitleModule(data) {
-  console.log('addTitleModule called with data:', data);
   const titleContainer = document.getElementById('titleContainer');
-  if (titleContainer) {
-    const titleElement = document.createElement('div');
-    titleElement.className = 'title-module';
+  if (!titleContainer) return;
 
-    // Display text
-    const titleDisplay = document.createElement('span');
-    titleDisplay.className = 'title-display';
-    titleDisplay.title = "Click to edit title";
-    titleDisplay.innerHTML = data && data.title ? '<ion-icon name="create-outline" class="edit-icon"></ion-icon> ' + data.title : 'Setlist Name';
+  const titleElement = document.createElement('div');
+  titleElement.className = 'title-module';
 
-    // Input for editing the title
-    const titleInput = document.createElement('input');
-    titleInput.className = 'title-input song-input'; // Add song-input class to match the song-input style
-    titleInput.type = 'text';
-    titleInput.placeholder = 'Add Setlist Title';
-    titleInput.value = data && data.title ? data.title : '';
+  const display = document.createElement('span');
+  display.className = 'title-display';
+  display.title = "Click to edit title";
 
-    // Sync display text
-    function updateTitleDisplay() {
-      const val = titleInput.value.trim();
-      if (val) {
-        titleDisplay.innerHTML = '<ion-icon name="create-outline" class="edit-icon"></ion-icon> ' + val;
-      } else {
-        titleDisplay.innerHTML = '';
-      }
-    }
+  const input = document.createElement('input');
+  input.className = 'title-input song-input';
+  input.type = 'text';
+  input.placeholder = 'Add Setlist Title';
+  input.value = data?.title || '';
 
-    // On blur, if there's a value, show the display
-    titleInput.addEventListener('blur', () => {
-      updateTitleDisplay();
-      const val = titleInput.value.trim();
-      if (val) {
-        titleInput.style.display = 'none';
-        titleDisplay.style.display = 'block';
-      } else {
-        titleInput.style.display = 'block';
-        titleDisplay.style.display = 'none';
-      }
-    });
-
-    // Clicking anywhere in title-module => revert to input
-    titleElement.addEventListener('click', () => {
-      titleDisplay.style.display = 'none';
-      titleInput.style.display = 'block';
-      titleInput.focus();
-    });
-
-    // Initialize display
-    updateTitleDisplay();
-    if (titleInput.value.trim()) {
-      titleInput.style.display = 'none';
-      titleDisplay.style.display = 'block';
+  function updateDisplay() {
+    const val = input.value.trim();
+    if (val) {
+      display.innerHTML = '<ion-icon name="create-outline" class="edit-icon"></ion-icon> ' + val;
+      input.style.display = 'none';
+      display.style.display = 'block';
     } else {
-      titleInput.style.display = 'block';
-      titleDisplay.style.display = 'none';
+      display.innerHTML = '';
+      input.style.display = 'block';
+      display.style.display = 'none';
     }
-
-    titleElement.appendChild(titleDisplay);
-    titleElement.appendChild(titleInput);
-    titleContainer.appendChild(titleElement);
-    console.log('Title module added:', titleElement);
-  } else {
-    console.error('Title container not found');
   }
+
+  input.addEventListener('blur', updateDisplay);
+  titleElement.addEventListener('click', () => {
+    display.style.display = 'none';
+    input.style.display = 'block';
+    input.focus();
+  });
+
+  updateDisplay();
+  titleElement.appendChild(display);
+  titleElement.appendChild(input);
+  titleContainer.appendChild(titleElement);
 }
 
-/* Refresh: clear ?data= and reload */
-function refreshPage() {
-  const baseUrl = window.location.origin + window.location.pathname;
-  window.location.href = baseUrl; // full reload
-}
-
-/* On page load */
+/* ========== PAGE INITIALIZATION ========== */
 document.addEventListener('DOMContentLoaded', () => {
   // 1) Dark mode preference
   loadDarkModePreference();
-  // Toggle with the switch
   const darkModeToggle = document.getElementById('darkModeToggle');
   darkModeToggle.addEventListener('change', () => {
     setDarkMode(darkModeToggle.checked);
@@ -547,14 +470,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3) Setup top bar
   document.getElementById('refreshBtn').addEventListener('click', refreshPage);
 
-  // 4) Bottom bar: +Add Song, Copy URL
+  // 4) Bottom bar: +Add Song, Share
   document.getElementById('addSongBtn').addEventListener('click', () => {
     addSongModule();
   });
-  document.getElementById('shareBtn').addEventListener('click', () => {
-    const newUrl = buildUrlWithValues(); // your existing function
   
-    // If the Web Share API is supported, open the native share sheet:
+  document.getElementById('shareBtn').addEventListener('click', () => {
+    const newUrl = buildUrlWithValues();
+  
+    // If the Web Share API is supported, open the native share sheet
     if (navigator.share) {
       navigator.share({
         title: 'Tempo Notes', 
@@ -564,10 +488,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Sharing canceled or failed', err);
       });
     } else {
-      // Fallback if Web Share API not supported (e.g., copy to clipboard)
+      // Fallback if Web Share API not supported (copy to clipboard)
       navigator.clipboard.writeText(newUrl)
         .then(() => alert(`URL copied to clipboard:\n${newUrl}`))
         .catch(err => alert('Error copying URL: ' + err));
     }
-  });  
+  });
 });
