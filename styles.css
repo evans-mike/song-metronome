@@ -388,13 +388,43 @@ input:checked + .slider:before {
     align-items: center;
     cursor: grab;  /* Make entire module grabbable */
     position: relative;
+    padding: 10px;
+    border-radius: 8px;
+    user-select: none; /* Prevent text selection while dragging */
+    cursor: default;
   }
   
   .song-module:active {
     cursor: grabbing;
   }
+
+  /* Style while dragging */
+  .song-module[draggable="true"]:hover {
+    cursor: grab;
+  }
+
+  .song-module:hover {
+    cursor: grab;
+    background: var(--hover-bg-color);
+  }
   
   .song-module.dragging {
     opacity: 0.4;
+  }
+
+  .song-module[draggable="true"]:active {
+    cursor: grabbing;
+  }
+  
+  /* Keep interactive elements' cursors */
+  .song-module input,
+  .song-module select,
+  .song-module button,
+  .song-module .beat-indicator {
+    cursor: pointer;
+  }
+  
+  .song-module input[type="text"] {
+    cursor: text;
   }
 }

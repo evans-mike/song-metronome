@@ -103,9 +103,30 @@ function createSongModule(index, data = {}) {
   const container = document.createElement('div');
   container.className = 'song-module';
   container.dataset.index = index;
-  container.draggable = true; // Keep draggable functionality
+  container.draggable = true;
 
-  // Song Title container (now first element)
+  // Prevent dragging when interacting with controls
+  const preventDrag = (e) => {
+    const target = e.target;
+    if (
+      target.tagName === 'INPUT' || 
+      target.tagName === 'SELECT' || 
+      target.tagName === 'BUTTON' ||
+      target.closest('.beat-indicator')
+    ) {
+      container.draggable = false;
+      // Re-enable dragging after the interaction
+      setTimeout(() => {
+        container.draggable = true;
+      }, 100);
+    }
+  };
+
+  // Add mousedown listener to handle draggable state
+  container.addEventListener('mousedown', preventDrag);
+  container.addEventListener('touchstart', preventDrag);
+
+  // Song Title container
   const songTitleContainer = document.createElement('div');
   songTitleContainer.className = 'song-title-container';
 
@@ -206,19 +227,39 @@ function createSongModule(index, data = {}) {
   removeBtn.title = "Remove this song";
   removeBtn.innerHTML = '<ion-icon name="trash-outline"></ion-icon>';
 
-  // Append in grid order - removed moveHandle
-  container.appendChild(songTitleContainer);   // col1 (now first)
-  container.appendChild(bpmSelect);           // col2
-  container.appendChild(tapTempoBtn);         // col3
-  container.appendChild(timesigSelect);       // col4
-  container.appendChild(beatIndicator);       // row2
-  container.appendChild(removeBtn);           // row2 col5
+  // Add mousedown listener to handle draggable state
+  container.addEventListener('mousedown', preventDrag);
+  container.addEventListener('touchstart', preventDrag);
 
-  // Keep drag and drop event listeners
-  container.addEventListener('dragstart', handleDragStart);
+  // Handle drag events
+  container.addEventListener('dragstart', (e) => {
+    draggedElement = container;
+    container.style.opacity = '0.4';
+    e.dataTransfer.effectAllowed = 'move';
+  });
+
   container.addEventListener('dragover', handleDragOver);
   container.addEventListener('drop', handleDrop);
-  container.addEventListener('dragend', handleDragEnd);
+  
+  container.addEventListener('dragend', (e) => {
+    container.style.opacity = '1';
+    
+    // Update the song modules' indices
+    const songModules = document.querySelectorAll('.song-module');
+    songModules.forEach((module, index) => {
+      module.dataset.index = index + 1;
+      updateBeatIndicator(index + 1);
+    });
+  });
+
+  // Append all elements
+  container.appendChild(songTitleContainer);
+  container.appendChild(bpmSelect);
+  container.appendChild(tapTempoBtn);
+  container.appendChild(timesigSelect);
+  container.appendChild(beatIndicator);
+  container.appendChild(removeBtn);
+
 
   // Tap data
   tapData[index] = { lastTapTime: 0 };
@@ -247,22 +288,13 @@ function createSongModule(index, data = {}) {
 
 let draggedElement = null;
 
-function handleDragStart(e) {
-  draggedElement = this;
-  this.style.opacity = '0.4';
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/html', this.innerHTML);
-}
-
 function handleDragOver(e) {
   e.preventDefault();
   e.dataTransfer.dropEffect = 'move';
+  
   const target = e.currentTarget;
   if (target !== draggedElement) {
-    // Get the bounding rectangle of target
     const targetRect = target.getBoundingClientRect();
-    const draggedRect = draggedElement.getBoundingClientRect();
-    
     if (e.clientY < targetRect.top + (targetRect.height / 2)) {
       target.parentNode.insertBefore(draggedElement, target);
     } else {
@@ -271,6 +303,7 @@ function handleDragOver(e) {
   }
 }
 
+// Update handleDrop function
 function handleDrop(e) {
   e.preventDefault();
   e.stopPropagation();
