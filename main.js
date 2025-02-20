@@ -38,10 +38,7 @@ function createSongModule(index, data = {}) {
   container.dataset.index = index;
   container.draggable = true;
 
-  // Add touch listeners to drag handle only
-  dragHandle.addEventListener('touchstart', handleTouchStart, { passive: false });
-  dragHandle.addEventListener('touchmove', handleTouchMove, { passive: false });
-  dragHandle.addEventListener('touchend', handleTouchEnd);
+ 
 
   // Desktop drag event handlers
   container.addEventListener('dragstart', handleDragStart);
@@ -58,6 +55,11 @@ function createSongModule(index, data = {}) {
   dragHandle.className = 'drag-handle';
   dragHandle.innerHTML = '<ion-icon name="reorder-two-outline"></ion-icon>'; // Using Ionicons
   dragHandle.setAttribute('aria-label', 'Drag to reorder');
+
+  // Add touch listeners to drag handle only
+  dragHandle.addEventListener('touchstart', handleTouchStart, { passive: false });
+  dragHandle.addEventListener('touchmove', handleTouchMove, { passive: false });
+  dragHandle.addEventListener('touchend', handleTouchEnd);
 
   // Create song title container
   const songTitleContainer = createSongTitleContainer(data);
