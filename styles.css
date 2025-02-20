@@ -182,14 +182,14 @@ input:checked + .slider:before {
   grid-template-rows: auto auto;
   gap: 10px;
   align-items: center;
-  touch-action: none;
+  touch-action: auto;
   transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.3s, color 0.3s;
   will-change: transform, opacity;
   user-select: none;
   -webkit-user-select: none;
   position: relative;
   z-index: 1;
-  cursor: grab;
+  cursor: default;
 }
 
 .song-module.dragging {
@@ -303,7 +303,11 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: none; /* Prevent scrolling on the drag handle */
   cursor: grab;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .drag-handle ion-icon {
@@ -458,9 +462,16 @@ input:checked + .slider:before {
 }
 
 /* Touch-specific hover handling */
-@media (hover: hover) {
+@media (hover: none) {
+  .song-module {
+      cursor: default;
+  }
+  
   .song-module:hover {
-    background-color: var(--hover-bg-color);
-    opacity: 0.95;
+      cursor: default;
+  }
+  
+  .drag-handle:active {
+      cursor: grabbing;
   }
 }

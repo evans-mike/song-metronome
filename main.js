@@ -38,10 +38,10 @@ function createSongModule(index, data = {}) {
   container.dataset.index = index;
   container.draggable = true;
 
-  // Touch event handlers
-  container.addEventListener('touchstart', handleTouchStart, { passive: false });
-  container.addEventListener('touchmove', handleTouchMove, { passive: false });
-  container.addEventListener('touchend', handleTouchEnd);
+  // Add touch listeners to drag handle only
+  dragHandle.addEventListener('touchstart', handleTouchStart, { passive: false });
+  dragHandle.addEventListener('touchmove', handleTouchMove, { passive: false });
+  dragHandle.addEventListener('touchend', handleTouchEnd);
 
   // Desktop drag event handlers
   container.addEventListener('dragstart', handleDragStart);
@@ -88,45 +88,47 @@ function createSongModule(index, data = {}) {
 
 // ========== Touch Event Handlers ==========
 function handleTouchStart(e) {
-  const target = e.target;
-  if (shouldPreventDrag(target)) return;
+  const songModule = this.closest('.song-module');
+  if (!songModule) return;
 
   touchStartY = e.touches[0].clientY;
   touchStartTime = Date.now();
-  touchedElement = this;
-  this.classList.add('dragging');
+  touchedElement = songModule;
+  songModule.classList.add('dragging');
 }
 
 function handleTouchMove(e) {
-  if (!touchedElement || touchedElement !== this) return;
+  const songModule = this.closest('.song-module');
+  if (!touchedElement || touchedElement !== songModule) return;
   
   e.preventDefault();
   const touch = e.touches[0];
   const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
   
   const targetElement = elements.find(el => 
-    el.classList.contains('song-module') && el !== touchedElement
+      el.classList.contains('song-module') && el !== touchedElement
   );
 
   if (targetElement) {
-    const targetRect = targetElement.getBoundingClientRect();
-    if (touch.clientY < targetRect.top + (targetRect.height / 2)) {
-      targetElement.parentNode.insertBefore(touchedElement, targetElement);
-    } else {
-      targetElement.parentNode.insertBefore(touchedElement, targetElement.nextSibling);
-    }
+      const targetRect = targetElement.getBoundingClientRect();
+      if (touch.clientY < targetRect.top + (targetRect.height / 2)) {
+          targetElement.parentNode.insertBefore(touchedElement, targetElement);
+      } else {
+          targetElement.parentNode.insertBefore(touchedElement, targetElement.nextSibling);
+      }
   }
 }
 
 function handleTouchEnd() {
-  if (!touchedElement || touchedElement !== this) return;
+  const songModule = this.closest('.song-module');
+  if (!touchedElement || touchedElement !== songModule) return;
   
   const touchDuration = Date.now() - touchStartTime;
   if (touchDuration >= 200) {
-    updateModuleIndices();
+      updateModuleIndices();
   }
   
-  this.classList.remove('dragging');
+  songModule.classList.remove('dragging');
   touchedElement = null;
 }
 
