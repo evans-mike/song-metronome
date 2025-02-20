@@ -236,6 +236,8 @@ input:checked + .slider:before {
 
 /* BPM <select>: col2 row1 */
 .bpm-select {
+  grid-column: 4;
+  grid-row: 1;
   padding: 8px;
   font-size: 1em;
   border: 1px solid var(--border-color);
@@ -274,6 +276,8 @@ input:checked + .slider:before {
 
 /* Time Sig => col4 row1 */
 .timesig-select {
+  grid-column: 5;
+  grid-row: 1;
   padding: 8px;
   font-size: 1em;
   border: 1px solid var(--border-color);
@@ -290,9 +294,29 @@ input:checked + .slider:before {
   border-color: var(--focus-border-color);
 }
 
+/* Add this new style for the drag handle */
+.drag-handle {
+  grid-column: 1/7;
+  grid-row: 3;
+  color: var(--border-color);
+  font-size: 1.5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+}
+
+.drag-handle ion-icon {
+  pointer-events: none; /* Prevents the icon from interfering with drag events */
+}
+
+.dragging .drag-handle {
+  cursor: grabbing;
+}
+
 /* .beat-indicator => col1..5, row2 */
 .beat-indicator {
-  grid-column: 1 / 6;
+  grid-column: 1 / 7; /* Changed from 1 / 6 to 2 / 6 */
   grid-row: 2;
   text-align: center;
   transition: color 0.3s;
@@ -312,7 +336,7 @@ input:checked + .slider:before {
 
 /* remove-song-btn => col5, row2 (bottom right) */
 .remove-song-btn {
-  grid-column: 5;
+  grid-column: 6;
   grid-row: 1;
   justify-self: end;
   background: none;
@@ -379,13 +403,14 @@ input:checked + .slider:before {
   }
 
   .song-title-container {
-    grid-column: 1;
+    grid-column: 1 / 3;
     grid-row: 1;
   }
 
   .tap-tempo-btn {
-    grid-column: 2;
-    grid-row: 1;
+    grid-column: 3;
+    grid-row: 2;
+    justify-self: left;
   }
 
   .bpm-select {
@@ -398,14 +423,20 @@ input:checked + .slider:before {
     grid-row: 2;
   }
 
+  .drag-handle {
+    grid-column: 1 / 4;
+    grid-row: 4;
+    padding-right: 10px;
+  }
+
   .beat-indicator {
-    grid-column: 1 / 3;
-    grid-row: 3;
+    grid-column: 1 / 4; /* Keep full width on mobile */
+    grid-row: 3; /* Move up one row on mobile */
   }
 
   .remove-song-btn {
-    grid-column: 2;
-    grid-row: 3;
+    grid-column: 3;
+    grid-row: 1;
     justify-self: end;
   }
 

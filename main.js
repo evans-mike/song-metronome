@@ -53,6 +53,12 @@ function createSongModule(index, data = {}) {
   container.addEventListener('mousedown', preventDragOnControls);
   container.addEventListener('touchstart', preventDragOnControls);
 
+  // Create drag handle icon
+  const dragHandle = document.createElement('div');
+  dragHandle.className = 'drag-handle';
+  dragHandle.innerHTML = '<ion-icon name="reorder-two-outline"></ion-icon>'; // Using Ionicons
+  dragHandle.setAttribute('aria-label', 'Drag to reorder');
+
   // Create song title container
   const songTitleContainer = createSongTitleContainer(data);
   
@@ -68,6 +74,7 @@ function createSongModule(index, data = {}) {
   container.appendChild(bpmSelect);
   container.appendChild(tapTempoBtn);
   container.appendChild(timesigSelect);
+  container.appendChild(dragHandle);     // Add this line
   container.appendChild(beatIndicator);
   container.appendChild(removeBtn);
 
