@@ -346,7 +346,7 @@ input:checked + .slider:before {
 .remove-song-btn {
   grid-column: 4;
   grid-row: 3;
-  justify-self: end;
+  justify-self: right;
   background: none;
   border: none;
   cursor: pointer;
@@ -450,7 +450,7 @@ input:checked + .slider:before {
   .remove-song-btn {
     grid-column: 3;
     grid-row: 4;
-    justify-self: end;
+    justify-self: right;
   }
 
   .footer {
