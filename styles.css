@@ -13,7 +13,6 @@
   --trash-icon-color: #ff3b30;
   --border-color: #ccc;
   --focus-border-color: #007aff;
-  --hover-bg-color: #f8f8f8;
 }
 
 /* Dark mode overrides */
@@ -31,7 +30,6 @@ body.dark-mode {
   --trash-icon-color: #ff453a;
   --border-color: #555;
   --focus-border-color: #aaa;
-  --hover-bg-color: #3c3c3e;
 }
 
 body {
@@ -45,13 +43,6 @@ body {
   margin: 0;
   padding: 20px;
   transition: background-color 0.3s, color 0.3s;
-}
-
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-  font-weight: 600;
-  font-size: 1.8em;
 }
 
 /* Top bar: refresh + dark mode toggle */
@@ -130,14 +121,6 @@ input:checked + .slider:before {
   font-size: 2em;
 }
 
-/* title Title container: col1 row1 */
-.title-title-container {
-  grid-column: 1;
-  grid-row: 1;
-  display: flex;
-  flex-direction: column;
-}
-
 .title-display {
   display: none;
   cursor: pointer;
@@ -182,7 +165,6 @@ input:checked + .slider:before {
   grid-template-rows: auto auto auto auto;
   gap: 10px;
   align-items: center;
-  touch-action: auto;
   transform-origin: center; /* Ensure rotation happens from center */
   transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.3s, color 0.3s, box-shadow 0.2s;
   will-change: transform, opacity;
@@ -190,7 +172,6 @@ input:checked + .slider:before {
   -webkit-user-select: none;
   position: relative;
   z-index: 1;
-  touch-action: auto; /* Allow normal touch behavior on the module */
   cursor: default;
 }
 
@@ -457,22 +438,6 @@ input:checked + .slider:before {
     margin-left: auto;  /* Add this */
     padding-right: 0;   /* Add this */
     width: fit-content; /* Add this */
-  }
-
-  .footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: auto;
-    text-align: center;
-    padding: 10px;
-    background-color: #f1f1f1;
-  }
-
-  .footer a img {
-    height: 12px;
-    width: auto;
-    display: block;
   }
 }
 
