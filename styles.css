@@ -450,7 +450,10 @@ input:checked + .slider:before {
   .remove-song-btn {
     grid-column: 3;
     grid-row: 4;
-    justify-self: right;
+    justify-self: end;
+    margin-left: auto;  /* Add this */
+    padding-right: 0;   /* Add this */
+    width: fit-content; /* Add this */
   }
 
   .footer {
