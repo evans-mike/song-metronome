@@ -289,11 +289,20 @@ input:checked + .slider:before {
   font-weight: bold;
   color: var(--indicator-inactive);
   font-size: 2em;
-  transition: color 0.2s;
+  transition: all 0.2s ease-out;
+  display: inline-block;  /* Add this to support transform */
 }
 
 .beat-indicator span.active {
   color: var(--indicator-active);
+  transform: scale(1.2);  /* Increase size by 30% */
+  transition: all 0.05s ease-in;
+}
+
+@keyframes beatPulse {
+  0% { transform: scale(1); }
+  20% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
 
 .drag-container {
