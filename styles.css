@@ -346,7 +346,10 @@ input:checked + .slider:before {
 .remove-song-btn {
   grid-column: 4;
   grid-row: 3;
-  justify-self: right;
+  justify-self: end;
+  margin-left: auto;  /* Add this */
+  padding-right: 0;   /* Add this */
+  width: fit-content; /* Add this */
   background: none;
   border: none;
   cursor: pointer;
