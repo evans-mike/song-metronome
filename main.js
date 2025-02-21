@@ -50,16 +50,23 @@ function createSongModule(index, data = {}) {
   container.addEventListener('mousedown', preventDragOnControls);
   container.addEventListener('touchstart', preventDragOnControls);
 
-  // Create drag handle icon
+  // Create container for drag handle icon
+  const dragContainer = document.createElement('div');
+  dragContainer.className = 'drag-container';
+
+  // Create the actual drag handle icon
   const dragHandle = document.createElement('div');
   dragHandle.className = 'drag-handle';
-  dragHandle.innerHTML = '<ion-icon name="reorder-two-outline"></ion-icon>'; // Using Ionicons
+  dragHandle.innerHTML = '<ion-icon name="reorder-two-outline"></ion-icon>';
   dragHandle.setAttribute('aria-label', 'Drag to reorder');
 
-  // Add touch listeners to drag handle only
+  // Add touch listeners to the icon's div
   dragHandle.addEventListener('touchstart', handleTouchStart, { passive: false });
   dragHandle.addEventListener('touchmove', handleTouchMove, { passive: false });
   dragHandle.addEventListener('touchend', handleTouchEnd);
+
+  // Nest the handle inside the container
+  dragContainer.appendChild(dragHandle);
 
   // Create song title container
   const songTitleContainer = createSongTitleContainer(data);
@@ -90,6 +97,8 @@ function createSongModule(index, data = {}) {
 
 // ========== Touch Event Handlers ==========
 function handleTouchStart(e) {
+  if (!e.target.classList.contains('drag-handle')) return;
+  
   const songModule = this.closest('.song-module');
   if (!songModule) return;
 
@@ -100,6 +109,8 @@ function handleTouchStart(e) {
 }
 
 function handleTouchMove(e) {
+  if (!e.target.classList.contains('drag-handle')) return;
+  
   const songModule = this.closest('.song-module');
   if (!touchedElement || touchedElement !== songModule) return;
   
@@ -121,7 +132,9 @@ function handleTouchMove(e) {
   }
 }
 
-function handleTouchEnd() {
+function handleTouchEnd(e) {
+  if (!e.target.classList.contains('drag-handle')) return;
+  
   const songModule = this.closest('.song-module');
   if (!touchedElement || touchedElement !== songModule) return;
   

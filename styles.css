@@ -189,6 +189,7 @@ input:checked + .slider:before {
   -webkit-user-select: none;
   position: relative;
   z-index: 1;
+  touch-action: auto; /* Allow normal touch behavior on the module */
   cursor: default;
 }
 
@@ -294,24 +295,33 @@ input:checked + .slider:before {
   border-color: var(--focus-border-color);
 }
 
+.drag-container {
+  grid-column: 1;
+  grid-row: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Add this new style for the drag handle */
 .drag-handle {
   grid-column: 1/7;
   grid-row: 3;
   color: var(--border-color);
   font-size: 1.5em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  touch-action: none; /* Prevent scrolling on the drag handle */
+  padding: 10px;
   cursor: grab;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;     /* Vertical centering */
+  justify-content: center; /* Horizontal centering */
 }
 
 .drag-handle ion-icon {
-  pointer-events: none; /* Prevents the icon from interfering with drag events */
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .dragging .drag-handle {
@@ -430,7 +440,7 @@ input:checked + .slider:before {
   .drag-handle {
     grid-column: 1 / 4;
     grid-row: 4;
-    padding-right: 10px;
+    padding: 15px 10px;
   }
 
   .beat-indicator {
@@ -461,17 +471,19 @@ input:checked + .slider:before {
   }
 }
 
-/* Touch-specific hover handling */
-@media (hover: none) {
-  .song-module {
-      cursor: default;
+/* Only show grab cursor on the drag handle */
+@media (hover: hover) {
+  .drag-handle:hover {
+      cursor: grab;
   }
   
-  .song-module:hover {
-      cursor: default;
-  }
-  
-  .drag-handle:active {
+  .dragging .drag-handle {
       cursor: grabbing;
+  }
+}
+
+@media (max-width: 480px) {
+  .drag-handle {
+      padding: 15px 10px; /* Increase vertical padding on mobile */
   }
 }
