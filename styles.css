@@ -13,6 +13,7 @@
   --trash-icon-color: #ff3b30;
   --border-color: #ccc;
   --focus-border-color: #007aff;
+  --module-border: transparent;  /* No border in light mode */
 }
 
 /* Dark mode overrides */
@@ -30,6 +31,7 @@ body.dark-mode {
   --trash-icon-color: #ff453a;
   --border-color: #555;
   --focus-border-color: #aaa;
+  --module-border: rgba(255, 255, 255, 0.1);  /* Subtle light border in dark mode */
 }
 
 body {
@@ -173,6 +175,7 @@ input:checked + .slider:before {
   position: relative;
   z-index: 1;
   cursor: default;
+  border: 1px solid var(--module-border); 
 }
 
 .song-module.dragging {
