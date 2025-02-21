@@ -203,7 +203,6 @@ input:checked + .slider:before {
   cursor: grabbing;
 }
 
-/* Song Title container: col1 row1 */
 .song-title-container {
   grid-column: 1;
   grid-row: 1;
@@ -236,7 +235,6 @@ input:checked + .slider:before {
   border-color: var(--focus-border-color);
 }
 
-/* Tap Tempo => col3 row1 */
 .tap-tempo-btn {
   grid-column: 2;
   grid-row: 1;
@@ -256,7 +254,6 @@ input:checked + .slider:before {
   background-color: var(--tap-button-hover);
 }
 
-/* BPM <select>: col2 row1 */
 .bpm-select {
   grid-column: 3;
   grid-row: 1;
@@ -276,7 +273,6 @@ input:checked + .slider:before {
   border-color: var(--focus-border-color);
 }
 
-/* Time Sig => col4 row1 */
 .timesig-select {
   grid-column: 4;
   grid-row: 1;
@@ -296,9 +292,8 @@ input:checked + .slider:before {
   border-color: var(--focus-border-color);
 }
 
-/* .beat-indicator => col1..5, row2 */
 .beat-indicator {
-  grid-column: 1 / 6; /* Changed from 1 / 6 to 2 / 6 */
+  grid-column: 1 / 6;
   grid-row: 2;
   text-align: center;
   transition: color 0.3s;
@@ -316,7 +311,6 @@ input:checked + .slider:before {
   color: var(--indicator-active);
 }
 
-/* Update drag container */
 .drag-container {
   grid-column: 1 / 6;
   grid-row: 3; 
@@ -329,14 +323,13 @@ input:checked + .slider:before {
 .drag-handle {
   color: var(--border-color);
   /* font-size: 1.5em; */
-  padding: 5px;
+  padding: 2px 10px;
   cursor: grab;
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Remove grid-column and grid-row from here since it's inside the container */
 }
 
 .drag-handle ion-icon {
@@ -349,7 +342,6 @@ input:checked + .slider:before {
   cursor: grabbing;
 }
 
-/* remove-song-btn => col5, row2 (bottom right) */
 .remove-song-btn {
   grid-column: 5;
   grid-row: 1;
@@ -441,12 +433,17 @@ input:checked + .slider:before {
   .drag-handle {
     grid-column: 1 / 4;
     grid-row: 4;
-    padding: 15px 10px;
+    padding: 2px 10px;
   }
 
   .beat-indicator {
-    grid-column: 1 / 4; /* Keep full width on mobile */
-    grid-row: 3; /* Move up one row on mobile */
+    grid-column: 1 / 4;
+    grid-row: 3;
+  }
+
+  .drag-container {
+    grid-column: 1 / 4; 
+    grid-row: 4; 
   }
 
   .remove-song-btn {
@@ -480,15 +477,5 @@ input:checked + .slider:before {
 
   .dragging .drag-handle {
     cursor: grabbing;
-  }
-}
-
-@media (max-width: 480px) {
-  .drag-handle {
-    padding: 15px 10px; /* Increase vertical padding on mobile */
-  }
-  .drag-container {
-    grid-column: 1; /* Keep in first column */
-    grid-row: 4; /* Match your mobile layout */
   }
 }

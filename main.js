@@ -83,7 +83,7 @@ function createSongModule(index, data = {}) {
   container.appendChild(bpmSelect);
   container.appendChild(tapTempoBtn);
   container.appendChild(timesigSelect);
-  container.appendChild(dragHandle);     // Add this line
+  container.appendChild(dragContainer);     // Add this line
   container.appendChild(beatIndicator);
   container.appendChild(removeBtn);
 
