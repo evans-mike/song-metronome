@@ -500,22 +500,26 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   document.getElementById('shareBtn').addEventListener('click', () => {
-    const newUrl = buildUrlWithValues();
-  
-    // If the Web Share API is supported, open the native share sheet
-    if (navigator.share) {
-      navigator.share({
-        title: 'Tempo Notes', 
-        text: 'Check out my current tempo set!',
-        url: newUrl
-      }).catch(err => {
-        console.log('Sharing canceled or failed', err);
-      });
-    } else {
-      // Fallback if Web Share API not supported (copy to clipboard)
-      navigator.clipboard.writeText(newUrl)
-        .then(() => alert(`URL copied to clipboard:\n${newUrl}`))
-        .catch(err => alert('Error copying URL: ' + err));
-    }
+      const newUrl = buildUrlWithValues();
+      
+      // Get the title from title-module if it exists
+      const titleInput = document.querySelector('.title-module .title-input');
+      const shareTitle = titleInput && titleInput.value.trim() ? titleInput.value.trim() : "Tempo Notes";
+    
+      // If the Web Share API is supported, open the native share sheet
+      if (navigator.share) {
+          navigator.share({
+              title: shareTitle,  // Use the dynamic title here
+              text: 'Check out my current tempo set!',
+              url: newUrl
+          }).catch(err => {
+              console.log('Sharing canceled or failed', err);
+          });
+      } else {
+          // Fallback if Web Share API not supported (copy to clipboard)
+          navigator.clipboard.writeText(newUrl)
+              .then(() => alert(`URL copied to clipboard:\n${newUrl}`))
+              .catch(err => alert('Error copying URL: ' + err));
+      }
   });
 });
